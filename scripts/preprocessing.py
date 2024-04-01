@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import pandas as pd
 
 import data
@@ -44,19 +45,31 @@ def run():
     assert attack_test.shape[1] == 7, "Invalid attack testing data shape"
     assert benign_test.shape[1] == 7, "Invalid benign testing data shape"
 
+    # add type column indicating attack or benign
+    attack_train["Type"] = 1
+    attack_test["Type"] = 1
+    benign_train["Type"] = 0
+    benign_test["Type"] = 0
+
+    # combine datasets
+    LOGGER.info("Combining datasets...")
+    train_dataset = pd.concat([attack_train, benign_train], ignore_index=True)
+    test_dataset = pd.concat([attack_test, benign_test], ignore_index=True)
+    # generate labels
+    train_labels = train_dataset["Type"]
+    test_labels = test_dataset["Type"]
+
     # summary statistics
     LOGGER.info("Summarizing datasets...")
-    LOGGER.info(f"Attack training data:\n{attack_train.describe()}")
-    LOGGER.info(f"Benign training data:\n{benign_train.describe()}")
-    LOGGER.info(f"Attack testing data:\n{attack_test.describe()}")
-    LOGGER.info(f"Benign testing data:\n{benign_test.describe()}")
+    LOGGER.info(f"Training data:\n{attack_train.describe()}")
+    LOGGER.info(f"Testing data:\n{attack_test.describe()}")
 
     # write data to files
     LOGGER.info("Writing data to files...")
-    attack_train.to_csv(data.PREPROCESSED_ATTACK_TRAIN, index=False)
-    benign_train.to_csv(data.PREPROCESSED_BENIGN_TRAIN, index=False)
-    attack_test.to_csv(data.PREPROCESSED_ATTACK_TEST, index=False)
-    benign_test.to_csv(data.PREPROCESSED_BENIGN_TEST, index=False)
+    train_dataset.to_csv(data.PREPROCESSED_TRAIN)
+    test_dataset.to_csv(data.PREPROCESSED_TEST)
+    np.save(data.LABELS_TRAIN, train_labels)
+    np.save(data.LABELS_TEST, test_labels)
 
     LOGGER.debug("Finished data preprocessing")
 

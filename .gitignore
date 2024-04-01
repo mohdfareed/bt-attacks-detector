@@ -14,5 +14,8 @@
 # log files
 *.log
 
-# dataset files
-*.csv
+# datasets and models
+data/
+!data/*.py
+models/
+!models/*.py
