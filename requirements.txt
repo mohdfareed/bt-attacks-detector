@@ -1,1 +1,6 @@
 rich # logging
+
+pandas
+numpy
+matplotlib
+scikit-learn
