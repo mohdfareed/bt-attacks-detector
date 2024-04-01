@@ -22,10 +22,18 @@ def main(
     """
 
     utils.setup_logging(debug)
-    scripts.preprocessing.run() if preprocess else None
-    scripts.feature_extraction.run() if features else None
-    scripts.training.run() if train else None
-    scripts.evaluation.run() if eval else None
+    try:
+        scripts.preprocessing.run() if preprocess else None
+        scripts.feature_extraction.run() if features else None
+        scripts.training.run() if train else None
+        scripts.evaluation.run() if eval else None
+    except KeyboardInterrupt:
+        LOGGER.warning("Execution interrupted.")
+        exit(0)
+    except Exception as exception:
+        LOGGER.exception(exception)
+        LOGGER.error(f"Execution failed.")
+        exit(1)
     LOGGER.info("Exiting...")
 
 
