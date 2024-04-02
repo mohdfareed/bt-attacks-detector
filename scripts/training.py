@@ -30,7 +30,6 @@ def run():
     LOGGER.debug("Training model...")
     model = GradientBoostingClassifier(verbose=2)
     model.fit(training_features, training_labels)
-    model: GradientBoostingClassifier = bayes_search.best_estimator_  # type: ignore
 
     # evaluate model
     LOGGER.debug("Evaluating model...")

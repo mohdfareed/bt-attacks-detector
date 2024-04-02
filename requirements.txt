@@ -1,9 +1,8 @@
 # utilities
 rich
 keyboard
-
-# machine learning
+# data processing
 pandas
 numpy
-matplotlib
+# machine learning
 scikit-learn

@@ -54,8 +54,6 @@ def run():
     train_dataset = train_dataset.sample(frac=1).reset_index(drop=True)
     test_dataset = test_dataset.sample(frac=1).reset_index(drop=True)
 
-    # TODO: add more preprocessing steps here
-
     # generate labels
     train_labels = train_dataset["Type"]
     train_dataset.drop(columns=["Type"], inplace=True)

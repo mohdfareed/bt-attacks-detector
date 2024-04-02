@@ -62,12 +62,6 @@ def read_data():
     dataset = pd.read_csv(data.PREPROCESSED_TEST)
     labels = np.load(data.LABELS_TEST)
 
-    # shuffle data
-    permutation = np.random.permutation(dataset.shape[0])
-    dataset = dataset.iloc[permutation]
-    labels = labels[permutation]
-    # TODO: remove if part of preprocessing
-
     for (i, _), label in zip(dataset.iterrows(), labels):
         if cancellation_event.is_set():
             break  # stop reading data when cancelled
