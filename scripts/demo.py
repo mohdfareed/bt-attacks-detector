@@ -2,6 +2,7 @@ import logging
 import queue
 import threading
 import time
+from calendar import c
 
 import keyboard
 import numpy as np
@@ -25,6 +26,7 @@ data_queue: queue.Queue[tuple[pd.DataFrame, int]] = queue.Queue()  # data queue
 cancellation_event = threading.Event()  # token to stop data reader
 pause_event = threading.Event()  # pause reading data
 pause_event.set()  # pause when NOT set, start unpause
+data_type = 0  # 0: all, 1: attack, 2: benign
 
 
 def run():
@@ -112,6 +114,14 @@ def read_data():
         if not pause_event.is_set():
             pause_event.wait()  # pause reading data
 
+        # check data type
+        if data_type == 0 and label == 1 and np.random.rand() < 0.66:
+            continue  # skip 2/3 of attack data
+        if data_type == 1 and label == 0:
+            continue  # only show attack data
+        if data_type == 2 and label == 1:
+            continue  # only show benign data
+
         row = dataset.iloc[[i]]  # type: ignore
         data_queue.put((row, label))
         time.sleep(1)  # simulate real-time data
@@ -134,18 +144,39 @@ def check_keypress():
     """Check for pause signal."""
 
     LOGGER.warning("Press [yellow]ESC[/] to pause/unpause")
+    LOGGER.warning("Press [blue]TAB[/] to cycle data type")
     while True:
         if cancellation_event.is_set():
             break
         event = keyboard.read_event()
-        if event.event_type != keyboard.KEY_DOWN or event.name != "esc":
+
+        if event.event_type != keyboard.KEY_DOWN:
             continue
 
-        if pause_event.is_set():
-            pause_event.clear()
-            print("[yellow]Paused[/]")
-        else:
-            pause_event.set()
+        if event.name == "esc":
+            toggle_pause()
+        elif event.name == "tab":
+            cycle_data_type()
+
+
+def toggle_pause():
+    if pause_event.is_set():
+        pause_event.clear()
+        print("[yellow]Paused[/]")
+    else:
+        pause_event.set()
+
+
+def cycle_data_type():
+    global data_type
+    data_type = (data_type + 1) % 3
+
+    if data_type == 0:
+        print("[blue]Showing [bold white]all[/] data[/]")
+    elif data_type == 1:
+        print("[blue]Showing [red bold]attack[/] data only[/]")
+    else:
+        print("[blue]Showing [green bold]benign[/] data only[/]")
 
 
 if __name__ == "__main__":

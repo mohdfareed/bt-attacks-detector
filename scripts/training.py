@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 import sklearn.metrics as metrics
@@ -30,12 +31,12 @@ def run():
         ) from exception
 
     # train model
-    LOGGER.info("Training model...")
+    LOGGER.debug("Training model...")
     model = GradientBoostingClassifier(verbose=2)
     model.fit(training_features, training_labels)
 
     # evaluate model
-    LOGGER.debug("Evaluating model...")
+    LOGGER.info("Evaluating model...")
     predictions = model.predict(testing_features)
     accuracy = metrics.accuracy_score(testing_labels, predictions)
     LOGGER.warning(f"Train accuracy: {accuracy}")
@@ -47,6 +48,12 @@ def run():
     # write model to file
     LOGGER.info("Saving model...")
     dump(model, models.GBM_MODEL)
+    # write evaluation metrics to file
+    eval_file = os.path.join(utils.root_dir, "evaluation.txt")
+    with open(eval_file, "w") as file:
+        file.write(f"Train accuracy: {accuracy}\n\n")
+        file.write(f"Confusion matrix:\n{conf_matrix}\n\n")
+        file.write(f"Classification report:\n{report}\n")
 
     LOGGER.info("Model training complete")
 

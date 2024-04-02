@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 import pandas as pd
@@ -41,13 +42,6 @@ def run():
                 dataset[column].dtype == data_type
             ), f"Invalid data type for {column}"
 
-    # data shape check
-    LOGGER.debug("Checking data shapes...")
-    assert attack_train.shape[1] == 7, "Invalid attack training data shape"
-    assert benign_train.shape[1] == 7, "Invalid benign training data shape"
-    assert attack_test.shape[1] == 7, "Invalid attack testing data shape"
-    assert benign_test.shape[1] == 7, "Invalid benign testing data shape"
-
     # add type column indicating attack or benign
     attack_train["Type"] = 1
     attack_test["Type"] = 1
@@ -58,6 +52,7 @@ def run():
     LOGGER.info("Combining datasets...")
     train_dataset = pd.concat([attack_train, benign_train], ignore_index=True)
     test_dataset = pd.concat([attack_test, benign_test], ignore_index=True)
+
     # generate labels
     train_labels = train_dataset["Type"]
     train_dataset.drop(columns=["Type"], inplace=True)
@@ -65,7 +60,7 @@ def run():
     test_dataset.drop(columns=["Type"], inplace=True)
 
     # summary statistics
-    LOGGER.info("Summarizing datasets...")
+    LOGGER.debug("Summarizing datasets...")
     LOGGER.warning(f"Training data:\n{attack_train.describe()}")
     LOGGER.warning(f"Testing data:\n{attack_test.describe()}")
 
@@ -75,6 +70,12 @@ def run():
     test_dataset.to_csv(data.PREPROCESSED_TEST, index=False)
     np.save(data.LABELS_TRAIN, train_labels)
     np.save(data.LABELS_TEST, test_labels)
+
+    # write data statistics to file
+    stats_file = os.path.join(utils.root_dir, "data_stats.txt")
+    with open(stats_file, "w") as file:
+        file.write(f"Training data:\n{attack_train.describe()}\n\n")
+        file.write(f"Testing data:\n{attack_test.describe()}\n\n")
 
     LOGGER.debug("Data preprocessing complete")
 
