@@ -4,7 +4,8 @@ from logging.handlers import RotatingFileHandler
 
 from rich.logging import RichHandler
 
-from scripts.feature_extraction import LOGGER
+LOGGER = logging.getLogger(__name__)
+"""Evaluation logger."""
 
 root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 logging_file = os.path.join(root_dir, "logs", "log.log")

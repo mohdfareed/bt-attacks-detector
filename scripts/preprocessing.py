@@ -61,8 +61,8 @@ def run():
 
     # summary statistics
     LOGGER.info("Summarizing datasets...")
-    LOGGER.info(f"Training data:\n{attack_train.describe()}")
-    LOGGER.info(f"Testing data:\n{attack_test.describe()}")
+    LOGGER.warning(f"Training data:\n{attack_train.describe()}")
+    LOGGER.warning(f"Testing data:\n{attack_test.describe()}")
 
     # write data to files
     LOGGER.info("Writing data to files...")
