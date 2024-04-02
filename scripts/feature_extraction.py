@@ -1,7 +1,7 @@
 import logging
 
 import pandas as pd
-from joblib import dump
+from joblib import dump, load
 from scipy.sparse import csr_matrix, hstack, save_npz
 from sklearn.feature_extraction import FeatureHasher
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -17,37 +17,32 @@ LOGGER = logging.getLogger(__name__)
 
 def run():
     """Run the feature extraction script."""
-    LOGGER.info("Running feature extraction...")
+    LOGGER.info("Performing feature extraction...")
 
     LOGGER.debug("Loading datasets...")
-    try:  # load preprocessed datasets
-        train_dataset = pd.read_csv(data.PREPROCESSED_TRAIN)
-        test_dataset = pd.read_csv(data.PREPROCESSED_TEST)
-    except FileNotFoundError as exception:
-        raise FileNotFoundError(
-            "Preprocessed dataset files not found"
-        ) from exception
+    train_dataset = pd.read_csv(data.PREPROCESSED_TRAIN)
+    test_dataset = pd.read_csv(data.PREPROCESSED_TEST)
 
     # apply tf-idf vectorization to Info column
-    LOGGER.info("Applying TF-IDF vectorization...")
+    LOGGER.debug("Applying TF-IDF vectorization...")
     vectorizer = TfidfVectorizer()
     train_info = vectorizer.fit_transform(train_dataset["Info"])
     test_info = vectorizer.transform(test_dataset["Info"])
 
     # apply one-hot encoding to Protocol column
-    LOGGER.info("Applying one-hot encoding...")
+    LOGGER.debug("Applying one-hot encoding...")
     encoder = OneHotEncoder()
     train_protocol = encoder.fit_transform(train_dataset[["Protocol"]])
     test_protocol = encoder.transform(test_dataset[["Protocol"]])
 
     # apply standard scaling to Length column
-    LOGGER.info("Applying standard scaling...")
+    LOGGER.debug("Applying standard scaling...")
     scaler = StandardScaler()
     train_length = scaler.fit_transform(train_dataset[["Length"]])
     test_length = scaler.transform(test_dataset[["Length"]])
 
     # apply feature hashing to Source and Destination columns
-    LOGGER.info("Applying feature hashing...")
+    LOGGER.debug("Applying feature hashing...")
     train_source = apply_feature_hashing(train_dataset, "Source")
     test_source = apply_feature_hashing(test_dataset, "Source")
     train_destination = apply_feature_hashing(train_dataset, "Destination")
@@ -77,12 +72,12 @@ def run():
     )
 
     # write features and models to files
-    LOGGER.info("Writing data and models to files...")
+    LOGGER.debug("Writing data and models to files...")
     save_npz(data.FEATURES_TRAIN, train_features)
     save_npz(data.FEATURES_TEST, test_features)
     dump(vectorizer, models.VECTORIZER_MODEL)
-    dump(scaler, models.SCALER_MODEL)
     dump(encoder, models.ENCODER_MODEL)
+    dump(scaler, models.SCALER_MODEL)
 
     LOGGER.debug("Feature extraction complete")
 
@@ -94,6 +89,38 @@ def apply_feature_hashing(dataset, column, n_features=20):
         dataset[column].apply(lambda x: [str(x)])
     )
     return hashed_features
+
+
+def create_feature_extractor():
+    """Create a feature extractor."""
+
+    LOGGER.debug("Loading feature extraction models...")
+    vectorizer: TfidfVectorizer = load(models.VECTORIZER_MODEL)
+    encoder: OneHotEncoder = load(models.ENCODER_MODEL)
+    scaler: StandardScaler = load(models.SCALER_MODEL)
+
+    def extract_features(data: pd.DataFrame) -> csr_matrix:
+        """Generate the features for the given dataset row."""
+        nonlocal vectorizer, encoder
+        # extract features and combine
+        info = vectorizer.transform(data["Info"])
+        protocol = encoder.transform(data[["Protocol"]])
+        length = scaler.transform(data[["Length"]])
+        source = apply_feature_hashing(data, "Source")
+        destination = apply_feature_hashing(data, "Destination")
+        features = hstack(
+            [
+                csr_matrix(data[["Time"]]),
+                source,
+                destination,
+                protocol,
+                csr_matrix(length),
+                info,
+            ]
+        )
+        return features  # type: ignore
+
+    return extract_features
 
 
 if __name__ == "__main__":

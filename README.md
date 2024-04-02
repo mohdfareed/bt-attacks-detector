@@ -1,6 +1,6 @@
-# Bluetooth Attack Detector
+# Bluetooth Attacks Detector
 
-Machine learning model designed to detect and analyze Bluetooth attacks.
+Machine learning model designed to detect Bluetooth DDoS/DoS attacks.
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@ Machine learning model designed to detect and analyze Bluetooth attacks.
 
 ## Development Environment Setup
 
-For Linux or macOS, follow the steps below:
+For Linux or macOS, run the following:
 
 ```sh
 git clone https://github.com/mohdfareed/bt-attacks-detector.git
@@ -17,7 +17,7 @@ cd bt-attacks-detector
 ./setup.sh
 ```
 
-For Windows, follow the steps below with PowerShell as an administrator:
+For Windows, run the following with PowerShell as an administrator:
 
 ```ps1
 git clone https://github.com/mohdfareed/bt-attacks-detector.git
@@ -28,12 +28,14 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 
 ## Usage
 
-Download the [dataset](https://www.unb.ca/cic/datasets/iomt-dataset-2024.html)
-and place the Bluetooth DDoS and DoS attack/benign dataset in the `data`
-directory. Processed data and models will be saved in the `data` and `models`
-directories. Logs will be saved to the root of the project. The following is
-the expected directory structure of un-managed files:
+<!-- TODO: update dataset download instructions -->
 
+Download the [dataset](https://www.unb.ca/cic/datasets/iomt-dataset-2024.html)
+and place the Bluetooth attack/benign dataset in the `data` directory.
+Processed data and models will be saved in the `data` and `models` directories.
+Logs will be saved to the root of the project. Dataset statistics and model
+evaluation results will be saved in the root of the project as well. The
+following is the expected directory structure of un-managed files:
 
 ```txt
 project_root/
@@ -43,23 +45,33 @@ project_root/
 │   ├── benign_test.csv
 │   └── benign_train.csv
 ├── models/
-└── dev.log
+├── dataset_stats.txt
+├── dev.log
+└── evaluation.txt
 ```
 
 Run the following command to see the usage information:
 
 ```sh
+source .venv/bin/activate # Linux/macOS
 ./main.py --help
 ```
 
-Admin privileges are required to run the demonstration script. Run the
-following commands to run the demonstration script on Linux/macOS:
+```ps1
+.\.venv\Scripts\Activate.ps1 # Windows
+.\main.py --help
+```
+
+Admin privileges are required to run the demonstration script to monitor user
+input for pausing and controlling communication type. Run the following to run
+the demonstration script on Linux/macOS:
 
 ```sh
 sudo ./main.py --demo [--verbose]
 ```
 
-On Windows, run the following commands with PowerShell as an administrator:
+On Windows, run the following commands with PowerShell running with
+administrator privileges:
 
 ```ps1
 .\main.py --demo [--verbose]

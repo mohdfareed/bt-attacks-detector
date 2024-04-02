@@ -11,10 +11,8 @@
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 
-# log files
+# project
 *.log
-
-# datasets and models
 data/
 !data/*.py
 models/

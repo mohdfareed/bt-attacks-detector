@@ -1,5 +1,4 @@
 import logging
-import os
 
 import numpy as np
 import pandas as pd
@@ -23,16 +22,13 @@ _data_types = {
 
 def run():
     """Run the data preprocessing script."""
-    LOGGER.info("Running data preprocessing...")
+    LOGGER.info("Preprocessing dataset...")
 
     LOGGER.debug("Loading datasets...")
-    try:  # load datasets
-        attack_train = pd.read_csv(data.ATTACK_TRAIN)
-        benign_train = pd.read_csv(data.BENIGN_TRAIN)
-        attack_test = pd.read_csv(data.ATTACK_TEST)
-        benign_test = pd.read_csv(data.BENIGN_TEST)
-    except FileNotFoundError as exception:
-        raise FileNotFoundError("Dataset files not found") from exception
+    attack_train = pd.read_csv(data.ATTACK_TRAIN)
+    benign_train = pd.read_csv(data.BENIGN_TRAIN)
+    attack_test = pd.read_csv(data.ATTACK_TEST)
+    benign_test = pd.read_csv(data.BENIGN_TEST)
 
     # data types check
     LOGGER.debug("Checking data types...")
@@ -49,9 +45,14 @@ def run():
     benign_test["Type"] = 0
 
     # combine datasets
-    LOGGER.info("Combining datasets...")
+    LOGGER.debug("Combining datasets...")
     train_dataset = pd.concat([attack_train, benign_train], ignore_index=True)
     test_dataset = pd.concat([attack_test, benign_test], ignore_index=True)
+
+    # shuffle datasets
+    LOGGER.debug("Shuffling datasets...")
+    train_dataset = train_dataset.sample(frac=1).reset_index(drop=True)
+    test_dataset = test_dataset.sample(frac=1).reset_index(drop=True)
 
     # TODO: add more preprocessing steps here
 
@@ -66,18 +67,12 @@ def run():
     LOGGER.warning(f"Training data:\n{attack_train.describe()}")
     LOGGER.warning(f"Testing data:\n{attack_test.describe()}")
 
-    # write data to files
-    LOGGER.info("Writing data to files...")
+    # write modified dataset to files
+    LOGGER.debug("Writing final datasets to files...")
     train_dataset.to_csv(data.PREPROCESSED_TRAIN, index=False)
     test_dataset.to_csv(data.PREPROCESSED_TEST, index=False)
     np.save(data.LABELS_TRAIN, train_labels)
     np.save(data.LABELS_TEST, test_labels)
-
-    # write data statistics to file
-    stats_file = os.path.join(utils.root_dir, "data_stats.txt")
-    with open(stats_file, "w") as file:
-        file.write(f"Training data:\n{attack_train.describe()}\n\n")
-        file.write(f"Testing data:\n{attack_test.describe()}\n\n")
 
     LOGGER.debug("Data preprocessing complete")
 

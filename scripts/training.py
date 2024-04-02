@@ -1,15 +1,16 @@
 import logging
-import os
 
 import numpy as np
+import pandas as pd
 import sklearn.metrics as metrics
-from joblib import dump
+from joblib import dump, load
 from scipy.sparse import load_npz
 from sklearn.ensemble import GradientBoostingClassifier
 
 import data
 import models
 import scripts.utils as utils
+from scripts.feature_extraction import create_feature_extractor
 
 LOGGER = logging.getLogger(__name__)
 """Model training logger."""
@@ -17,26 +18,22 @@ LOGGER = logging.getLogger(__name__)
 
 def run():
     """Run the model training script."""
-    LOGGER.info("Running model training...")
+    LOGGER.info("Training model...")
 
     LOGGER.debug("Loading features and labels...")
-    try:  # load features and labels
-        training_features = load_npz(data.FEATURES_TRAIN)
-        training_labels = np.load(data.LABELS_TRAIN)
-        testing_features = load_npz(data.FEATURES_TEST)
-        testing_labels = np.load(data.LABELS_TEST)
-    except FileNotFoundError as exception:
-        raise FileNotFoundError(
-            "Feature and/or label files not found"
-        ) from exception
+    training_features = load_npz(data.FEATURES_TRAIN)
+    training_labels = np.load(data.LABELS_TRAIN)
+    testing_features = load_npz(data.FEATURES_TEST)
+    testing_labels = np.load(data.LABELS_TEST)
 
     # train model
     LOGGER.debug("Training model...")
     model = GradientBoostingClassifier(verbose=2)
     model.fit(training_features, training_labels)
+    model: GradientBoostingClassifier = bayes_search.best_estimator_  # type: ignore
 
     # evaluate model
-    LOGGER.info("Evaluating model...")
+    LOGGER.debug("Evaluating model...")
     predictions = model.predict(testing_features)
     accuracy = metrics.accuracy_score(testing_labels, predictions)
     LOGGER.warning(f"Train accuracy: {accuracy}")
@@ -46,16 +43,28 @@ def run():
     LOGGER.warning(f"Classification report:\n{report}")
 
     # write model to file
-    LOGGER.info("Saving model...")
+    LOGGER.debug("Saving model...")
     dump(model, models.GBM_MODEL)
-    # write evaluation metrics to file
-    eval_file = os.path.join(utils.root_dir, "evaluation.txt")
-    with open(eval_file, "w") as file:
-        file.write(f"Train accuracy: {accuracy}\n\n")
-        file.write(f"Confusion matrix:\n{conf_matrix}\n\n")
-        file.write(f"Classification report:\n{report}\n")
 
-    LOGGER.info("Model training complete")
+    LOGGER.debug("Model training complete")
+
+
+def create_predictor():
+    """Create a model predictor."""
+
+    LOGGER.debug("Loading prediction model...")
+    model: GradientBoostingClassifier = load(models.GBM_MODEL)
+    extract_features = create_feature_extractor()
+
+    def predict(data: pd.DataFrame) -> int:
+        """Generate the features for the given dataset row."""
+        nonlocal model
+        # extract features and combine
+        features = extract_features(data)
+        # make prediction
+        return model.predict(features)  # type: ignore
+
+    return predict
 
 
 if __name__ == "__main__":

@@ -6,17 +6,11 @@ import time
 import keyboard
 import numpy as np
 import pandas as pd
-from joblib import load
 from rich import print
-from scipy.sparse import csr_matrix, hstack
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 import data
-import models
 import scripts.utils as utils
-from scripts.feature_extraction import apply_feature_hashing
+from scripts.training import create_predictor as create_ml_predicator
 
 LOGGER = logging.getLogger(__name__)
 """Evaluation logger."""
@@ -33,17 +27,15 @@ def run():
     LOGGER.info("Running demonstration...")
 
     # load models
-    LOGGER.info("Loading models...")
-    vectorizer: TfidfVectorizer = load(models.VECTORIZER_MODEL)
-    encoder: OneHotEncoder = load(models.ENCODER_MODEL)
-    scaler: StandardScaler = load(models.SCALER_MODEL)
-    model: GradientBoostingClassifier = load(models.GBM_MODEL)
+    LOGGER.debug("Loading models...")
+    predict_ml = create_ml_predicator()
 
     # start background thread to read data
-    LOGGER.info("Reading data...")
+    LOGGER.debug("Reading data...")
     data_thread = threading.Thread(target=read_data)
     data_thread.start()
     # start background thread to check for keypress
+    LOGGER.debug("Listening to commands...")
     keyboard_thread = threading.Thread(target=check_keypress)
     keyboard_thread.start()
 
@@ -52,7 +44,7 @@ def run():
             row, label = data_queue.get()
             if row is None:
                 break  # stop processing data when finished
-            prediction = predict(row, model, vectorizer, encoder, scaler)
+            prediction = predict_ml(row)
             display(row, label, prediction)
 
     except:  # stop thread on error
@@ -61,37 +53,7 @@ def run():
     finally:  # wait for thread to finish
         data_thread.join()
 
-    LOGGER.info("Demonstration complete")
-
-
-def predict(
-    data: pd.DataFrame,
-    model: GradientBoostingClassifier,
-    vectorizer: TfidfVectorizer,
-    encoder: OneHotEncoder,
-    scaler: StandardScaler,
-) -> int:
-    """Generate the features for the given dataset row."""
-
-    # extract features and combine
-    info = vectorizer.transform(data["Info"])
-    protocol = encoder.transform(data[["Protocol"]])
-    length = scaler.transform(data[["Length"]])
-    source = apply_feature_hashing(data, "Source")
-    destination = apply_feature_hashing(data, "Destination")
-    features = hstack(
-        [
-            csr_matrix(data[["Time"]]),
-            source,
-            destination,
-            protocol,
-            csr_matrix(length),
-            info,
-        ]
-    )
-
-    # make prediction
-    return model.predict(features)  # type: ignore
+    LOGGER.debug("Demonstration complete")
 
 
 def read_data():
@@ -147,7 +109,6 @@ def check_keypress():
         if cancellation_event.is_set():
             break
         event = keyboard.read_event()
-
         if event.event_type != keyboard.KEY_DOWN:
             continue
 
