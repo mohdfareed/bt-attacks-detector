@@ -53,6 +53,8 @@ def run():
     train_dataset = pd.concat([attack_train, benign_train], ignore_index=True)
     test_dataset = pd.concat([attack_test, benign_test], ignore_index=True)
 
+    # TODO: add more preprocessing steps here
+
     # generate labels
     train_labels = train_dataset["Type"]
     train_dataset.drop(columns=["Type"], inplace=True)

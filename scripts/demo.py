@@ -2,7 +2,6 @@ import logging
 import queue
 import threading
 import time
-from calendar import c
 
 import keyboard
 import numpy as np
@@ -53,8 +52,7 @@ def run():
             row, label = data_queue.get()
             if row is None:
                 break  # stop processing data when finished
-            features = extract_features(row, vectorizer, encoder, scaler)
-            prediction = model.predict(features)
+            prediction = predict(row, model, vectorizer, encoder, scaler)
             display(row, label, prediction)
 
     except:  # stop thread on error
@@ -66,25 +64,21 @@ def run():
     LOGGER.info("Demonstration complete")
 
 
-def extract_features(
+def predict(
     data: pd.DataFrame,
+    model: GradientBoostingClassifier,
     vectorizer: TfidfVectorizer,
     encoder: OneHotEncoder,
     scaler: StandardScaler,
-) -> csr_matrix:
+) -> int:
     """Generate the features for the given dataset row."""
 
-    # apply tf-idf vectorization to Info column
+    # extract features and combine
     info = vectorizer.transform(data["Info"])
-    # apply one-hot encoding to Protocol column
     protocol = encoder.transform(data[["Protocol"]])
-    # apply standard scaling to Length column
     length = scaler.transform(data[["Length"]])
-    # apply feature hashing to Source and Destination columns
     source = apply_feature_hashing(data, "Source")
     destination = apply_feature_hashing(data, "Destination")
-
-    # combine features
     features = hstack(
         [
             csr_matrix(data[["Time"]]),
@@ -95,11 +89,14 @@ def extract_features(
             info,
         ]
     )
-    return features  # type: ignore
+
+    # make prediction
+    return model.predict(features)  # type: ignore
 
 
 def read_data():
     """Read the testing data."""
+    global data_type
     dataset = pd.read_csv(data.PREPROCESSED_TEST)
     labels = np.load(data.LABELS_TEST)
 
@@ -107,6 +104,7 @@ def read_data():
     permutation = np.random.permutation(dataset.shape[0])
     dataset = dataset.iloc[permutation]
     labels = labels[permutation]
+    # TODO: remove if part of preprocessing
 
     for (i, _), label in zip(dataset.iterrows(), labels):
         if cancellation_event.is_set():
@@ -124,7 +122,7 @@ def read_data():
 
         row = dataset.iloc[[i]]  # type: ignore
         data_queue.put((row, label))
-        time.sleep(1)  # simulate real-time data
+        time.sleep(0.5)  # simulate real-time data
     # signal end of data
     data_queue.put(None)  # type: ignore
 
@@ -143,8 +141,8 @@ def display(row: pd.DataFrame, label, pred):
 def check_keypress():
     """Check for pause signal."""
 
-    LOGGER.warning("Press [yellow]ESC[/] to pause/unpause")
-    LOGGER.warning("Press [blue]TAB[/] to cycle data type")
+    print("Press [yellow]ESC[/] to pause/unpause")
+    print("Press [blue]TAB[/] to cycle data type")
     while True:
         if cancellation_event.is_set():
             break
@@ -172,11 +170,11 @@ def cycle_data_type():
     data_type = (data_type + 1) % 3
 
     if data_type == 0:
-        print("[blue]Showing [bold white]all[/] data[/]")
+        print("[blue]Showing [bold white]ALL[/] data[/]")
     elif data_type == 1:
-        print("[blue]Showing [red bold]attack[/] data only[/]")
+        print("[blue]Showing [red bold]ATTACK[/] data only[/]")
     else:
-        print("[blue]Showing [green bold]benign[/] data only[/]")
+        print("[blue]Showing [green bold]BENIGN[/] data only[/]")
 
 
 if __name__ == "__main__":
