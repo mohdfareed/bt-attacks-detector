@@ -2,7 +2,7 @@
 
 import logging
 
-import scripts.evaluation
+import scripts.demo
 import scripts.feature_extraction
 import scripts.preprocessing
 import scripts.training
@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(
-    debug: bool, preprocess: bool, features: bool, train: bool, eval: bool
+    verbose: bool, preprocess: bool, features: bool, train: bool, demo: bool
 ):
     """Run the specified scripts.
 
@@ -21,12 +21,12 @@ def main(
         debug (bool): Whether to log debug messages.
     """
 
-    utils.setup_logging(debug)
+    utils.setup_logging(verbose)
     try:
         scripts.preprocessing.run() if preprocess else None
         scripts.feature_extraction.run() if features else None
         scripts.training.run() if train else None
-        scripts.evaluation.run() if eval else None
+        scripts.demo.run() if demo else None
     except KeyboardInterrupt:
         LOGGER.warning("Execution interrupted.")
         exit(0)
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Run project script.")
     parser.add_argument(
-        "-d", "--debug", action="store_true", help="enable debug mode"
+        "-v", "--verbose", action="store_true", help="enable verbose mode"
     )
     parser.add_argument(
         "-p", "--preprocess", action="store_true", help="preprocess data"
@@ -54,8 +54,8 @@ if __name__ == "__main__":
         "-t", "--train", action="store_true", help="train models"
     )
     parser.add_argument(
-        "-e", "--eval", action="store_true", help="run evaluation"
+        "-d", "--demo", action="store_true", help="run demonstration"
     )
 
     args = parser.parse_args()
-    main(args.debug, args.preprocess, args.features, args.train, args.eval)
+    main(args.verbose, args.preprocess, args.features, args.train, args.demo)

@@ -1,5 +1,4 @@
-rich # logging
-
+rich
 pandas
 numpy
 matplotlib

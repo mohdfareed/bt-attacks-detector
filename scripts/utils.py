@@ -8,7 +8,7 @@ LOGGER = logging.getLogger(__name__)
 """Evaluation logger."""
 
 root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-logging_file = os.path.join(root_dir, "logs", "log.log")
+logging_file = os.path.join(root_dir, "dev.log")
 reduced_logging_modules = []  # modules with reduced (WARNING) logging level
 
 

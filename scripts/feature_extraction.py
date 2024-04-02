@@ -79,7 +79,7 @@ def run():
     dump(scaler, models.SCALER_MODEL)
     dump(encoder, models.ENCODER_MODEL)
 
-    LOGGER.debug("Finished feature extraction")
+    LOGGER.debug("Feature extraction complete")
 
 
 def apply_feature_hashing(dataset, column, n_features=20):

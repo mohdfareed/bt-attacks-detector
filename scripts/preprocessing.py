@@ -71,7 +71,7 @@ def run():
     np.save(data.LABELS_TRAIN, train_labels)
     np.save(data.LABELS_TEST, test_labels)
 
-    LOGGER.debug("Finished data preprocessing")
+    LOGGER.debug("Data preprocessing complete")
 
 
 if __name__ == "__main__":

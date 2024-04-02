@@ -25,3 +25,31 @@ Set-Location -Path .\bt-attacks-detector
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 .\setup.ps1
 ```
+
+## Usage
+
+Download the [dataset](https://www.unb.ca/cic/datasets/iomt-dataset-2024.html)
+and place the Bluetooth DDOS and DOS attack/benign dataset in the `data`
+directory. Processed data and models will be saved in the `data` and `models`
+directories. Logs will be saved to the root of the project. The following is
+the expected directory structure:
+
+
+```txt
+project_root/
+├── data/
+│   ├── attack_test.csv
+│   ├── attack_train.csv
+│   ├── benign_test.csv
+│   └── benign_train.csv
+├── models/
+└── dev.log
+```
+
+Processed data and models will be saved in the `data` and `models` directories.
+
+Run the following command to see the usage information:
+
+```sh
+./main.py --help
+```
