@@ -9,7 +9,7 @@ Machine learning model designed to detect and analyze Bluetooth attacks.
 
 ## Development Environment Setup
 
-For Linux or MacOS, follow the steps below:
+For Linux or macOS, follow the steps below:
 
 ```sh
 git clone https://github.com/mohdfareed/bt-attacks-detector.git
@@ -29,10 +29,10 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 ## Usage
 
 Download the [dataset](https://www.unb.ca/cic/datasets/iomt-dataset-2024.html)
-and place the Bluetooth DDOS and DOS attack/benign dataset in the `data`
+and place the Bluetooth DDoS and DoS attack/benign dataset in the `data`
 directory. Processed data and models will be saved in the `data` and `models`
 directories. Logs will be saved to the root of the project. The following is
-the expected directory structure:
+the expected directory structure of un-managed files:
 
 
 ```txt
@@ -46,8 +46,6 @@ project_root/
 └── dev.log
 ```
 
-Processed data and models will be saved in the `data` and `models` directories.
-
 Run the following command to see the usage information:
 
 ```sh
@@ -55,8 +53,14 @@ Run the following command to see the usage information:
 ```
 
 Admin privileges are required to run the demonstration script. Run the
-following command to run the demonstration script:
+following commands to run the demonstration script on Linux/macOS:
 
 ```sh
 sudo ./main.py --demo [--verbose]
+```
+
+On Windows, run the following commands with PowerShell as an administrator:
+
+```ps1
+.\main.py --demo [--verbose]
 ```

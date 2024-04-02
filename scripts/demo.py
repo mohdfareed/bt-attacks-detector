@@ -119,20 +119,21 @@ def read_data():
     data_queue.put(None)  # type: ignore
 
 
-def display(row: pd.DataFrame, label, prediction):
+def display(row: pd.DataFrame, label, pred):
     """Display the data row and prediction."""
-    label = "[red]Attack[/]" if label else "[green]Benign[/]"
-    prediction = (
-        "[bold red]Attack[/]" if prediction else "[bold green]Benign[/]"
-    )
+    label = "[bold red]Attack[/]" if label else "[bold green]Benign[/]"
+    pred = "[bold red]Attack[/]" if pred else "[bold green]Benign[/]"
 
-    print(f"\n<{label}>\n{row.to_string(index=False)}")
-    print(f"[bold]Prediction:[/] {prediction}")
+    print()
+    print(row.to_string(index=False))
+    print(f"[bold]Label:[/]      {label}")
+    print(f"[bold]Prediction:[/] {pred}")
 
 
 def check_keypress():
     """Check for pause signal."""
 
+    LOGGER.warning("Press [yellow]ESC[/] to pause/unpause")
     while True:
         if cancellation_event.is_set():
             break
