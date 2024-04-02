@@ -18,3 +18,6 @@ LABELS_TEST = os.path.join(data_dir, "labels_test.npy")
 # feature extraction files
 FEATURES_TEST = os.path.join(data_dir, "features_test.npz")
 FEATURES_TRAIN = os.path.join(data_dir, "features_train.npz")
+
+# manually captured data
+DATA_CAPTURE = os.path.join(data_dir, "data_capture.csv")

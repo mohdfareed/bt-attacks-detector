@@ -32,7 +32,8 @@ def run():
 
     # start background thread to read data
     LOGGER.debug("Reading data...")
-    data_thread = threading.Thread(target=read_data)
+    # data_thread = threading.Thread(target=read_data)
+    data_thread = threading.Thread(target=read_captured_data)
     data_thread.start()
     # start background thread to check for keypress
     LOGGER.debug("Listening to commands...")
@@ -54,6 +55,24 @@ def run():
         data_thread.join()
 
     LOGGER.debug("Demonstration complete")
+
+
+def read_captured_data():
+    """Read the captured data."""
+    global data_type
+    dataset = pd.read_csv(data.DATA_CAPTURE)
+
+    for i, _ in dataset.iterrows():
+        if cancellation_event.is_set():
+            break  # stop reading data when cancelled
+        if not pause_event.is_set():
+            pause_event.wait()  # pause reading data
+
+        row = dataset.iloc[[i]]  # type: ignore
+        data_queue.put((row, -1))
+        time.sleep(0.5)  # simulate real-time data
+    # signal end of data
+    data_queue.put(None)  # type: ignore
 
 
 def read_data():
@@ -85,7 +104,11 @@ def read_data():
 
 def display(row: pd.DataFrame, label, pred):
     """Display the data row and prediction."""
-    label = "[bold red]Attack[/]" if label else "[bold green]Benign[/]"
+    label = (
+        "[bold red]Attack[/]"
+        if label == 1
+        else "[bold green]Benign[/]" if label == 0 else "[bold blue]Unknown[/]"
+    )
     pred = "[bold red]Attack[/]" if pred else "[bold green]Benign[/]"
 
     print()

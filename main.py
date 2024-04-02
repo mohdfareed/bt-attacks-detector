@@ -13,7 +13,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 def main(
-    verbose: bool, preprocess: bool, features: bool, train: bool, demo: bool
+    verbose: bool,
+    preprocess: bool,
+    features: bool,
+    train: bool,
+    demo: bool,
 ):
     """Run the specified scripts.
 
@@ -58,4 +62,10 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    main(args.verbose, args.preprocess, args.features, args.train, args.demo)
+    main(
+        args.verbose,
+        args.preprocess,
+        args.features,
+        args.train,
+        args.demo,
+    )
