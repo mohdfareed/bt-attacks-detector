@@ -53,3 +53,10 @@ Run the following command to see the usage information:
 ```sh
 ./main.py --help
 ```
+
+Admin privileges are required to run the demonstration script. Run the
+following command to run the demonstration script:
+
+```sh
+sudo ./main.py --demo [--verbose]
+```

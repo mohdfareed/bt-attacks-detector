@@ -1,4 +1,8 @@
+# utilities
 rich
+keyboard
+
+# machine learning
 pandas
 numpy
 matplotlib
