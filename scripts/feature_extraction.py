@@ -20,8 +20,13 @@ def run():
     LOGGER.info("Running feature extraction...")
 
     LOGGER.debug("Loading datasets...")
-    train_dataset = pd.read_csv(data.PREPROCESSED_TRAIN)
-    test_dataset = pd.read_csv(data.PREPROCESSED_TEST)
+    try:  # load preprocessed datasets
+        train_dataset = pd.read_csv(data.PREPROCESSED_TRAIN)
+        test_dataset = pd.read_csv(data.PREPROCESSED_TEST)
+    except FileNotFoundError as exception:
+        raise FileNotFoundError(
+            "Preprocessed dataset files not found"
+        ) from exception
 
     # apply tf-idf vectorization to Info column
     LOGGER.info("Applying TF-IDF vectorization...")
@@ -101,9 +106,9 @@ if __name__ == "__main__":
     try:
         run()
     except KeyboardInterrupt:
-        LOGGER.warning("Execution interrupted.")
+        LOGGER.warning("Execution interrupted")
         exit(0)
     except Exception as exception:
         LOGGER.exception(exception)
-        LOGGER.error(f"Execution failed.")
+        LOGGER.error(f"Execution failed")
         exit(1)

@@ -18,12 +18,16 @@ def run():
     """Run the model training script."""
     LOGGER.info("Running model training...")
 
-    # load features and labels
     LOGGER.debug("Loading features and labels...")
-    training_features = load_npz(data.FEATURES_TRAIN)
-    training_labels = np.load(data.LABELS_TRAIN)
-    testing_features = load_npz(data.FEATURES_TEST)
-    testing_labels = np.load(data.LABELS_TEST)
+    try:  # load features and labels
+        training_features = load_npz(data.FEATURES_TRAIN)
+        training_labels = np.load(data.LABELS_TRAIN)
+        testing_features = load_npz(data.FEATURES_TEST)
+        testing_labels = np.load(data.LABELS_TEST)
+    except FileNotFoundError as exception:
+        raise FileNotFoundError(
+            "Feature and/or label files not found"
+        ) from exception
 
     # train model
     LOGGER.info("Training model...")
@@ -57,9 +61,9 @@ if __name__ == "__main__":
     try:
         run()
     except KeyboardInterrupt:
-        LOGGER.warning("Execution interrupted.")
+        LOGGER.warning("Execution interrupted")
         exit(0)
     except Exception as exception:
         LOGGER.exception(exception)
-        LOGGER.error(f"Execution failed.")
+        LOGGER.error(f"Execution failed")
         exit(1)

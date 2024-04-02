@@ -28,11 +28,11 @@ def main(
         scripts.training.run() if train else None
         scripts.demo.run() if demo else None
     except KeyboardInterrupt:
-        LOGGER.warning("Execution interrupted.")
+        LOGGER.warning("Execution interrupted")
         exit(0)
     except Exception as exception:
         LOGGER.exception(exception)
-        LOGGER.error(f"Execution failed.")
+        LOGGER.error(f"Execution failed")
         exit(1)
     LOGGER.info("Exiting...")
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         "-t", "--train", action="store_true", help="train models"
     )
     parser.add_argument(
-        "-d", "--demo", action="store_true", help="run demonstration"
+        "-d", "--demo", action="store_true", help="run demo (requires admin)"
     )
 
     args = parser.parse_args()

@@ -25,10 +25,13 @@ def run():
     LOGGER.info("Running data preprocessing...")
 
     LOGGER.debug("Loading datasets...")
-    attack_train = pd.read_csv(data.ATTACK_TRAIN)
-    benign_train = pd.read_csv(data.BENIGN_TRAIN)
-    attack_test = pd.read_csv(data.ATTACK_TEST)
-    benign_test = pd.read_csv(data.BENIGN_TEST)
+    try:  # load datasets
+        attack_train = pd.read_csv(data.ATTACK_TRAIN)
+        benign_train = pd.read_csv(data.BENIGN_TRAIN)
+        attack_test = pd.read_csv(data.ATTACK_TEST)
+        benign_test = pd.read_csv(data.BENIGN_TEST)
+    except FileNotFoundError as exception:
+        raise FileNotFoundError("Dataset files not found") from exception
 
     # data types check
     LOGGER.debug("Checking data types...")
@@ -57,7 +60,9 @@ def run():
     test_dataset = pd.concat([attack_test, benign_test], ignore_index=True)
     # generate labels
     train_labels = train_dataset["Type"]
+    train_dataset.drop(columns=["Type"], inplace=True)
     test_labels = test_dataset["Type"]
+    test_dataset.drop(columns=["Type"], inplace=True)
 
     # summary statistics
     LOGGER.info("Summarizing datasets...")
@@ -66,8 +71,8 @@ def run():
 
     # write data to files
     LOGGER.info("Writing data to files...")
-    train_dataset.to_csv(data.PREPROCESSED_TRAIN)
-    test_dataset.to_csv(data.PREPROCESSED_TEST)
+    train_dataset.to_csv(data.PREPROCESSED_TRAIN, index=False)
+    test_dataset.to_csv(data.PREPROCESSED_TEST, index=False)
     np.save(data.LABELS_TRAIN, train_labels)
     np.save(data.LABELS_TEST, test_labels)
 
@@ -84,9 +89,9 @@ if __name__ == "__main__":
     try:
         run()
     except KeyboardInterrupt:
-        LOGGER.warning("Execution interrupted.")
+        LOGGER.warning("Execution interrupted")
         exit(0)
     except Exception as exception:
         LOGGER.exception(exception)
-        LOGGER.error(f"Execution failed.")
+        LOGGER.error(f"Execution failed")
         exit(1)
