@@ -15,5 +15,3 @@
 *.log
 data/
 !data/*.py
-models/
-!models/*.py
