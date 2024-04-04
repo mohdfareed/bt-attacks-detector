@@ -117,8 +117,8 @@ max    251708.000000    2094.097550      46.000000       1.0
 
 ### Feature Extraction
 
-- **TF-IDF Vocabulary size:** 609
-- **One-Hot Encoding unique categories:** 6
+- TF-IDF Vocabulary size: 609
+- One-Hot Encoding unique categories: 6
 - Standard Scaling mean: 22.7672
 - Standard Scaling std: 14.1469
 - Feature Hashing features count: 20
@@ -130,19 +130,17 @@ Training accuracy: 0.8341019057652395
 
 #### Confusion Matrix
 
-```txt
-[[ 63467   1863]
- [ 50733 200975]]
-```
+|                    | **True Positive** | **False Negative** |
+| ------------------ | ----------------- | ------------------ |
+| **True Negative**  | 63467             | 1863               |
+| **False Positive** | 50733             | 200975             |
 
 #### Classification Report
 
 ```txt
               precision    recall  f1-score   support
-
            0       0.56      0.97      0.71     65330
            1       0.99      0.80      0.88    251708
-
     accuracy                           0.83    317038
    macro avg       0.77      0.88      0.80    317038
 weighted avg       0.90      0.83      0.85    317038
