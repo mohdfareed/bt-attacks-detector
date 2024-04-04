@@ -6,7 +6,6 @@ Machine learning model designed to detect Bluetooth DDoS/DoS attacks.
 
 - Python 3.12
 - Git
-- Wireshark
 
 ## Development Environment Setup
 
@@ -63,17 +62,23 @@ source .venv/bin/activate # Linux/macOS
 .\main.py --help
 ```
 
-Admin privileges are required to run the demonstration script to monitor user
-input for pausing and controlling communication type. Run the following to run
-the demonstration script on Linux/macOS:
+The script uses manually captured Bluetooth packets to demonstrate the model's
+detection capabilities. The captured data must be at: `data/data_capture.csv`.
+Data was captured on macOS using
+[PacketLogger](https://www.bluetooth.com/blog/a-new-way-to-debug-iosbluetooth-applications/),
+then it was exported to `.btsnoop` format and converted to `.csv` format using
+Wireshark.
+
+Admin privileges are required to monitor user input for pausing/unpausing
+execution. On windows, the script must be run with PowerShell as an
+administrator to support this feature. The script can be run in demo mode using
+the following commands:
 
 ```sh
-sudo ./main.py --demo [--verbose]
+./main.py --demo [--verbose]      # Linux/macOS - pausing disabled
+sudo ./main.py --demo [--verbose] # Linux/macOS - pausing enabled
 ```
 
-On Windows, run the following commands with PowerShell running with
-administrator privileges:
-
 ```ps1
-.\main.py --demo [--verbose]
+.\main.py --demo [--verbose] # Windows
 ```

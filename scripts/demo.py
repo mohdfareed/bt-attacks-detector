@@ -26,27 +26,24 @@ def run():
     """Run the evaluation script."""
     LOGGER.info("Running demonstration...")
 
-    # check for sudo permissions
-    if os.geteuid() != 0:
-        LOGGER.error(
-            "This script requires sudo permissions to listen to keyboard "
-            "events for pausing/unpausing execution"
-        )
-        exit(1)
-
     # load prediction models
     LOGGER.debug("Loading models...")
     predict_ml = create_ml_predicator()
     predict_rules = create_rule_predicator()
 
     # start background thread to read data
-    LOGGER.debug("Reading data...")
     data_thread = threading.Thread(target=read_captured_data)
     data_thread.start()
+    LOGGER.debug("Started reading data...")
     # start background thread to check for keypress
-    LOGGER.debug("Listening to commands...")
-    keyboard_thread = threading.Thread(target=check_keypress)
-    keyboard_thread.start()
+    if os.geteuid() == 0:  # check for sudo permissions
+        keyboard_thread = threading.Thread(target=check_keypress)
+        keyboard_thread.start()
+        LOGGER.debug("Listening to commands...")
+    else:
+        LOGGER.warning(
+            "Listening to commands is disabled due to insufficient permissions"
+        )
 
     try:  # process data and make predictions
         while True:  # loop until cancelled
