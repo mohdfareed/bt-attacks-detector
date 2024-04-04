@@ -35,7 +35,9 @@ def run():
     data_thread = threading.Thread(target=read_captured_data)
     data_thread.start()
     LOGGER.debug("Started reading data...")
+
     # start background thread to check for keypress
+    keyboard_thread = None
     if os.geteuid() == 0:  # check for sudo permissions
         keyboard_thread = threading.Thread(target=check_keypress)
         keyboard_thread.start()
@@ -57,7 +59,7 @@ def run():
     finally:  # wait for threads to finish
         cancellation_event.set()
         data_thread.join()
-        keyboard_thread.join()
+        keyboard_thread.join() if keyboard_thread else None
     LOGGER.debug("Demonstration complete")
 
 
