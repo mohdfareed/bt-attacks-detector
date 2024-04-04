@@ -10,6 +10,7 @@ from rich import print
 
 import data
 import scripts.utils as utils
+from scripts.rule_based import create_predictor as create_rule_predicator
 from scripts.training import create_predictor as create_ml_predicator
 
 LOGGER = logging.getLogger(__name__)
@@ -22,13 +23,14 @@ pause_event.set()  # pause when NOT set, start unpause
 data_type = 0  # 0: all, 1: attack, 2: benign
 
 
-def run():
+def run(with_labels=False):
     """Run the evaluation script."""
     LOGGER.info("Running demonstration...")
 
     # load models
     LOGGER.debug("Loading models...")
     predict_ml = create_ml_predicator()
+    predict_rules = create_rule_predicator()
 
     # start background thread to read data
     LOGGER.debug("Reading data...")
@@ -45,8 +47,13 @@ def run():
             row, label = data_queue.get()
             if row is None:
                 break  # stop processing data when finished
-            prediction = predict_ml(row)
-            display(row, label, prediction)
+
+            ml_prediction = predict_ml(row)
+            if with_labels:
+                display(row, ml_prediction, label)
+            else:
+                rule_prediction = predict_rules(row)
+                display(row, ml_prediction, rule_prediction)
 
     except:  # stop thread on error
         cancellation_event.set()
@@ -102,26 +109,22 @@ def read_data():
     data_queue.put(None)  # type: ignore
 
 
-def display(row: pd.DataFrame, label, pred):
-    """Display the data row and prediction."""
-    label = (
-        "[bold red]Attack[/]"
-        if label == 1
-        else "[bold green]Benign[/]" if label == 0 else "[bold blue]Unknown[/]"
-    )
-    pred = "[bold red]Attack[/]" if pred else "[bold green]Benign[/]"
+def display(row: pd.DataFrame, pred_a, pred_b):
+    """Display the data row and predictions."""
+    pred_a = "[bold red]Attack[/]" if pred_a else "[bold green]Benign[/]"
+    pred_b = "[bold red]Attack[/]" if pred_b else "[bold green]Benign[/]"
 
     print()
     print(row.to_string(index=False))
-    print(f"[bold]Label:[/]      {label}")
-    print(f"[bold]Prediction:[/] {pred}")
+    print(f"[bold]ML Prediction:[/]         {pred_a}")
+    print(f"[bold]Rule-Based Prediction:[/] {pred_b}")
 
 
-def check_keypress():
+def check_keypress(with_labels=False):
     """Check for pause signal."""
 
     print("Press [yellow]ESC[/] to pause/unpause")
-    print("Press [blue]TAB[/] to cycle data type")
+    print("Press [blue]TAB[/] to cycle data type") if with_labels else None
     while True:
         if cancellation_event.is_set():
             break
@@ -131,7 +134,7 @@ def check_keypress():
 
         if event.name == "esc":
             toggle_pause()
-        elif event.name == "tab":
+        elif with_labels and event.name == "tab":
             cycle_data_type()
 
 

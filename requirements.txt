@@ -4,5 +4,6 @@ keyboard
 # data processing
 pandas
 numpy
+scapy
 # machine learning
 scikit-learn

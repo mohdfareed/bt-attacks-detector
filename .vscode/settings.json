@@ -1,7 +1,11 @@
 {
     "cSpell.words": [
         "dtype",
+        "PCAP",
+        "pyshark",
+        "rdpcap",
         "Tfidf",
-        "Vectorizer"
+        "Vectorizer",
+        "Wireshark"
     ]
 }

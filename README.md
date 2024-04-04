@@ -6,6 +6,7 @@ Machine learning model designed to detect Bluetooth DDoS/DoS attacks.
 
 - Python 3.12
 - Git
+- Wireshark
 
 ## Development Environment Setup
 
