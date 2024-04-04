@@ -4,37 +4,34 @@ import threading
 import time
 
 import keyboard
-import numpy as np
 import pandas as pd
 from rich import print
 
 import data
 import scripts.utils as utils
+from scripts.ml_model import create_predictor as create_ml_predicator
 from scripts.rule_based import create_predictor as create_rule_predicator
-from scripts.training import create_predictor as create_ml_predicator
 
 LOGGER = logging.getLogger(__name__)
 """Evaluation logger."""
 
-data_queue: queue.Queue[tuple[pd.DataFrame, int]] = queue.Queue()  # data queue
+data_queue: queue.Queue[pd.DataFrame | None] = queue.Queue()  # rows data queue
 cancellation_event = threading.Event()  # token to stop data reader
-pause_event = threading.Event()  # pause reading data
-pause_event.set()  # pause when NOT set, start unpause
-data_type = 0  # 0: all, 1: attack, 2: benign
+unpause_event = threading.Event()  # pause reading data
+unpause_event.set()  # pause when NOT set, start unpause
 
 
-def run(with_labels=False):
+def run():
     """Run the evaluation script."""
     LOGGER.info("Running demonstration...")
 
-    # load models
+    # load prediction models
     LOGGER.debug("Loading models...")
     predict_ml = create_ml_predicator()
     predict_rules = create_rule_predicator()
 
     # start background thread to read data
     LOGGER.debug("Reading data...")
-    # data_thread = threading.Thread(target=read_data)
     data_thread = threading.Thread(target=read_captured_data)
     data_thread.start()
     # start background thread to check for keypress
@@ -43,119 +40,72 @@ def run(with_labels=False):
     keyboard_thread.start()
 
     try:  # process data and make predictions
-        while True:
-            row, label = data_queue.get()
-            if row is None:
+        while True:  # loop until cancelled
+            if (row := data_queue.get()) is None:
                 break  # stop processing data when finished
-
             ml_prediction = predict_ml(row)
-            if with_labels:
-                display(row, ml_prediction, label)
-            else:
-                rule_prediction = predict_rules(row)
-                display(row, ml_prediction, rule_prediction)
+            rule_prediction = predict_rules(row)
+            display(row, ml_prediction, rule_prediction)
+        LOGGER.info("Finished reading captured data")
 
-    except:  # stop thread on error
+    finally:  # wait for threads to finish
         cancellation_event.set()
-        raise
-    finally:  # wait for thread to finish
         data_thread.join()
-
+        keyboard_thread.join()
     LOGGER.debug("Demonstration complete")
 
 
 def read_captured_data():
     """Read the captured data."""
-    global data_type
+    global data_queue, cancellation_event
     dataset = pd.read_csv(data.DATA_CAPTURE)
 
     for i, _ in dataset.iterrows():
+        while not unpause_event.is_set() and not cancellation_event.is_set():
+            time.sleep(0.1)
+            continue  # pause reading data
         if cancellation_event.is_set():
             break  # stop reading data when cancelled
-        if not pause_event.is_set():
-            pause_event.wait()  # pause reading data
 
-        row = dataset.iloc[[i]]  # type: ignore
-        data_queue.put((row, -1))
+        # queue row data
+        row: pd.DataFrame = dataset.iloc[[i]]  # type: ignore
+        data_queue.put(row)
+        LOGGER.debug(f"Read row {i}")
         time.sleep(0.5)  # simulate real-time data
+
     # signal end of data
-    data_queue.put(None)  # type: ignore
+    data_queue.put(None)
 
 
-def read_data():
-    """Read the testing data."""
-    global data_type
-    dataset = pd.read_csv(data.PREPROCESSED_TEST)
-    labels = np.load(data.LABELS_TEST)
+def check_keypress():
+    """Check for pause signal."""
+    global unpause_event, cancellation_event
 
-    for (i, _), label in zip(dataset.iterrows(), labels):
-        if cancellation_event.is_set():
-            break  # stop reading data when cancelled
-        if not pause_event.is_set():
-            pause_event.wait()  # pause reading data
+    print("Press [yellow]ESC[/] to pause/unpause")
+    while True:  # reading event without blocking
+        while not keyboard.is_pressed("esc"):
+            if cancellation_event.is_set():
+                return
+            time.sleep(0.1)
 
-        # check data type
-        if data_type == 0 and label == 1 and np.random.rand() < 0.66:
-            continue  # skip 2/3 of attack data
-        if data_type == 1 and label == 0:
-            continue  # only show attack data
-        if data_type == 2 and label == 1:
-            continue  # only show benign data
-
-        row = dataset.iloc[[i]]  # type: ignore
-        data_queue.put((row, label))
-        time.sleep(0.5)  # simulate real-time data
-    # signal end of data
-    data_queue.put(None)  # type: ignore
+        # pause/unpause data reading
+        if unpause_event.is_set():
+            unpause_event.clear()
+            print("[yellow]Paused[/]")
+        else:
+            unpause_event.set()
+        time.sleep(0.5)  # debounce keypress
 
 
-def display(row: pd.DataFrame, pred_a, pred_b):
+def display(row: pd.DataFrame, ml_pred, rule_pred):
     """Display the data row and predictions."""
-    pred_a = "[bold red]Attack[/]" if pred_a else "[bold green]Benign[/]"
-    pred_b = "[bold red]Attack[/]" if pred_b else "[bold green]Benign[/]"
+    ml_pred = "[bold red]Attack[/]" if ml_pred else "[bold green]Benign[/]"
+    rule_pred = "[bold red]Attack[/]" if rule_pred else "[bold green]Benign[/]"
 
     print()
     print(row.to_string(index=False))
-    print(f"[bold]ML Prediction:[/]         {pred_a}")
-    print(f"[bold]Rule-Based Prediction:[/] {pred_b}")
-
-
-def check_keypress(with_labels=False):
-    """Check for pause signal."""
-
-    print("Press [yellow]ESC[/] to pause/unpause")
-    print("Press [blue]TAB[/] to cycle data type") if with_labels else None
-    while True:
-        if cancellation_event.is_set():
-            break
-        event = keyboard.read_event()
-        if event.event_type != keyboard.KEY_DOWN:
-            continue
-
-        if event.name == "esc":
-            toggle_pause()
-        elif with_labels and event.name == "tab":
-            cycle_data_type()
-
-
-def toggle_pause():
-    if pause_event.is_set():
-        pause_event.clear()
-        print("[yellow]Paused[/]")
-    else:
-        pause_event.set()
-
-
-def cycle_data_type():
-    global data_type
-    data_type = (data_type + 1) % 3
-
-    if data_type == 0:
-        print("[blue]Showing [bold white]ALL[/] data[/]")
-    elif data_type == 1:
-        print("[blue]Showing [red bold]ATTACK[/] data only[/]")
-    else:
-        print("[blue]Showing [green bold]BENIGN[/] data only[/]")
+    print(f"[bold]ML Prediction:[/]         {ml_pred}")
+    print(f"[bold]Rule-Based Prediction:[/] {rule_pred}")
 
 
 if __name__ == "__main__":

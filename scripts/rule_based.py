@@ -20,7 +20,7 @@ def rules(packet: pd.DataFrame) -> int:
     if "data" in str(packet["Info"]).lower():
         return 1
 
-    if int(packet["Length"]) > 20:  # type: ignore
+    if int(packet["Length"].iloc[0]) > 20:  # type: ignore
         return 1
 
     return 0

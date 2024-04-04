@@ -4,8 +4,8 @@ import logging
 
 import scripts.demo
 import scripts.feature_extraction
+import scripts.ml_model
 import scripts.preprocessing
-import scripts.training
 import scripts.utils as utils
 
 LOGGER = logging.getLogger(__name__)
@@ -29,9 +29,10 @@ def main(
     try:
         scripts.preprocessing.run() if preprocess else None
         scripts.feature_extraction.run() if features else None
-        scripts.training.run() if train else None
+        scripts.ml_model.run() if train else None
         scripts.demo.run() if demo else None
     except KeyboardInterrupt:
+        print()
         LOGGER.warning("Execution interrupted")
         exit(0)
     except Exception as exception:
