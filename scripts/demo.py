@@ -1,4 +1,5 @@
 import logging
+import os
 import queue
 import threading
 import time
@@ -24,6 +25,14 @@ unpause_event.set()  # pause when NOT set, start unpause
 def run():
     """Run the evaluation script."""
     LOGGER.info("Running demonstration...")
+
+    # check for sudo permissions
+    if os.geteuid() != 0:
+        LOGGER.error(
+            "This script requires sudo permissions to listen to keyboard "
+            "events for pausing/unpausing execution"
+        )
+        exit(1)
 
     # load prediction models
     LOGGER.debug("Loading models...")
@@ -80,8 +89,8 @@ def read_captured_data():
 def check_keypress():
     """Check for pause signal."""
     global unpause_event, cancellation_event
-
     print("Press [yellow]ESC[/] to pause/unpause")
+
     while True:  # reading event without blocking
         while not keyboard.is_pressed("esc"):
             if cancellation_event.is_set():
