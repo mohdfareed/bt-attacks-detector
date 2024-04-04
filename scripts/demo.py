@@ -79,7 +79,6 @@ def read_captured_data():
         # queue row data
         row: pd.DataFrame = dataset.iloc[[i]]  # type: ignore
         data_queue.put(row)
-        LOGGER.debug(f"Read row {i}")
         time.sleep(0.5)  # simulate real-time data
 
     # signal end of data
@@ -95,7 +94,7 @@ def check_keypress():
         while not keyboard.is_pressed("esc"):
             if cancellation_event.is_set():
                 return
-            time.sleep(0.1)
+            time.sleep(0.01)
 
         # pause/unpause data reading
         if unpause_event.is_set():
