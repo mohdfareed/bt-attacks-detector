@@ -71,6 +71,15 @@ def run():
         ]
     )
 
+    # report feature extraction results
+    LOGGER.debug("Feature extraction results:")
+    LOGGER.warning(f"TF-IDF Vocabulary size: {len(vectorizer.vocabulary_)}")
+    LOGGER.warning(f"One-Hot Encoding unique categories: {len(encoder.categories_[0])}")  # type: ignore
+    LOGGER.warning(f"Standard Scaling mean: {scaler.mean_[0]:.4f}")  # type: ignore
+    LOGGER.warning(f"Standard Scaling std: {scaler.scale_[0]:.4f}")  # type: ignore
+    LOGGER.warning(f"Feature Hashing features count: {train_source.shape[1]}")
+    LOGGER.warning(f"Total number of features: {train_features.shape[1]}")
+
     # write features and models to files
     LOGGER.debug("Writing data and models to files...")
     save_npz(data.FEATURES_TRAIN, train_features)

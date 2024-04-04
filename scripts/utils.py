@@ -12,12 +12,18 @@ logging_file = os.path.join(root_dir, "dev.log")
 reduced_logging_modules = []  # modules with reduced (WARNING) logging level
 
 
-def setup_logging(debug: bool = False) -> None:
+def setup_logging(debug: bool = False, cleanup: bool = False) -> None:
     """Setup the logging configuration.
 
     Args:
         debug (bool): Whether to enable debug mode.
     """
+    if cleanup:  # delete existing logging file
+        try:
+            os.remove(logging_file)
+        except FileNotFoundError:
+            pass
+
     # logging formats
     console_formatter = logging.Formatter(
         r"%(message)s [bright_black]- [italic]%(name)s[/italic] "

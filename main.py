@@ -18,6 +18,7 @@ def main(
     features: bool,
     train: bool,
     demo: bool,
+    cleanup: bool,
 ):
     """Run the specified scripts.
 
@@ -25,7 +26,7 @@ def main(
         debug (bool): Whether to log debug messages.
     """
 
-    utils.setup_logging(verbose)
+    utils.setup_logging(verbose, cleanup)
     try:
         scripts.preprocessing.run() if preprocess else None
         scripts.feature_extraction.run() if features else None
@@ -61,6 +62,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--demo", action="store_true", help="run demo (requires admin)"
     )
+    parser.add_argument(
+        "-c", "--cleanup", action="store_true", help="clean up previous logs"
+    )
 
     args = parser.parse_args()
     main(
@@ -69,4 +73,5 @@ if __name__ == "__main__":
         args.features,
         args.train,
         args.demo,
+        args.cleanup,
     )
