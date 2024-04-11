@@ -28,6 +28,7 @@ def main(
 
     utils.setup_logging(verbose, cleanup)
     try:
+
         scripts.preprocessing.run() if preprocess else None
         scripts.feature_extraction.run() if features else None
         scripts.ml_model.run() if train else None

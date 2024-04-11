@@ -9,24 +9,29 @@ def rules(packet: pd.DataFrame) -> int:
     min_size = 20  # define the minimum expected packet size
     threshold_packet_length = 200
 
-    if str(packet["Source"]) in local_sources:
-        direction = 0  # incoming
+    if '0x000d' in str(packet["Info"]) or 'Unknown' in packet["Info"]:
+        return 1  # incoming
+
+    elif "Offset: 0" in str(packet["Info"]):
+        return 1
+
+    elif "0x0013" in str(packet["Info"]):
+        return 1
+
+    elif "data" in str(packet["Info"]).lower():
+        return 1
+    
+    elif int(packet["Length"].iloc[0]) > 20:  # type: ignore
+        return 1
+
     else:
-        direction = 1  # outgoing
-
-    if direction == 0:
-        return 1
-
-    if "data" in str(packet["Info"]).lower():
-        return 1
-
-    if int(packet["Length"].iloc[0]) > 20:  # type: ignore
-        return 1
-
-    return 0
+        return 0
 
 
 def create_predictor():
     """Create a rule-based predictor of captured data."""
 
     return rules
+
+
+Offset: 0
