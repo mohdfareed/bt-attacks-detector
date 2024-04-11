@@ -1,11 +1,7 @@
 import logging
-import os
-import queue
-import threading
 import time
 
-import keyboard
-import pandas as pd
+import pandas as pd  # type: ignore
 from rich import print
 
 import data
@@ -15,11 +11,6 @@ from scripts.rule_based import create_predictor as create_rule_predicator
 
 LOGGER = logging.getLogger(__name__)
 """Evaluation logger."""
-
-data_queue: queue.Queue[pd.DataFrame | None] = queue.Queue()  # rows data queue
-cancellation_event = threading.Event()  # token to stop data reader
-unpause_event = threading.Event()  # pause reading data
-unpause_event.set()  # pause when NOT set, start unpause
 
 
 def run():
@@ -31,88 +22,40 @@ def run():
     predict_ml = create_ml_predicator()
     predict_rules = create_rule_predicator()
 
-    # start background thread to read data
-    data_thread = threading.Thread(target=read_captured_data)
-    data_thread.start()
-    LOGGER.debug("Started reading data...")
+    # accuracy tracking
+    ml_misclassifications = 0
+    rule_misclassifications = 0
 
-    # start background thread to check for keypress
-    keyboard_thread = None
-    if os.geteuid() == 0:  # check for sudo permissions
-        keyboard_thread = threading.Thread(target=check_keypress)
-        keyboard_thread.start()
-        LOGGER.debug("Listening to commands...")
-    else:
-        LOGGER.warning(
-            "Listening to commands is disabled due to insufficient permissions"
-        )
-
-    try:  # process data and make predictions
-        while True:  # loop until cancelled
-            if (row := data_queue.get()) is None:
-                break  # stop processing data when finished
-            ml_prediction = predict_ml(row)
-            rule_prediction = predict_rules(row)
-            display(row, ml_prediction, rule_prediction)
-        LOGGER.info("Finished reading captured data")
-
-    finally:  # wait for threads to finish
-        cancellation_event.set()
-        data_thread.join()
-        keyboard_thread.join() if keyboard_thread else None
-    LOGGER.debug("Demonstration complete")
-
-
-def read_captured_data():
-    """Read the captured data."""
-    global data_queue, cancellation_event
-    dataset = pd.read_csv(data.DATA_CAPTURE)
-
+    # load demo data
+    dataset = pd.read_csv(data.DEMO_DATA)
     for i, _ in dataset.iterrows():
-        while not unpause_event.is_set() and not cancellation_event.is_set():
-            time.sleep(0.1)
-            continue  # pause reading data
-        if cancellation_event.is_set():
-            break  # stop reading data when cancelled
-
-        # queue row data
-        row: pd.DataFrame = dataset.iloc[[i]]  # type: ignore
-        data_queue.put(row)
         time.sleep(0.5)  # simulate real-time data
+        row: pd.DataFrame = dataset.iloc[[i]]  # type: ignore
 
-    # signal end of data
-    data_queue.put(None)
+        # make predictions
+        ml_prediction = predict_ml(row)
+        rule_prediction = predict_rules(row)
 
+        # update accuracy
+        ml_misclassifications += int(ml_prediction)  # type: ignore
+        ml_accuracy = 1 - (ml_misclassifications / (int(i) + 1))  # type: ignore
+        rule_misclassifications += int(rule_prediction)
+        rule_accuracy = 1 - (rule_misclassifications / (int(i) + 1))  # type: ignore
 
-def check_keypress():
-    """Check for pause signal."""
-    global unpause_event, cancellation_event
-    print("Press [yellow]ESC[/] to pause/unpause")
-
-    while True:  # reading event without blocking
-        while not keyboard.is_pressed("esc"):
-            if cancellation_event.is_set():
-                return
-            time.sleep(0.01)
-
-        # pause/unpause data reading
-        if unpause_event.is_set():
-            unpause_event.clear()
-            print("[yellow]Paused[/]")
-        else:
-            unpause_event.set()
-        time.sleep(0.5)  # debounce keypress
-
-
-def display(row: pd.DataFrame, ml_pred, rule_pred):
-    """Display the data row and predictions."""
-    ml_pred = "[bold red]Attack[/]" if ml_pred else "[bold green]Benign[/]"
-    rule_pred = "[bold red]Attack[/]" if rule_pred else "[bold green]Benign[/]"
-
-    print()
-    print(row.to_string(index=False))
-    print(f"[bold]ML Prediction:[/]         {ml_pred}")
-    print(f"[bold]Rule-Based Prediction:[/] {rule_pred}")
+        # display results
+        print()
+        print(row.to_string(index=False))
+        print(
+            f"[bold]ML Prediction:[/]\t\t"
+            f"{'[bold red]Attack[/]' if ml_prediction else '[bold green]Benign[/]'}\t"
+            f"Accuracy: {ml_accuracy * 100:.2f}%"
+        )
+        print(
+            f"[bold]Rule-Based Prediction:[/]\t"
+            f"{'[bold red]Attack[/]' if rule_prediction else '[bold green]Benign[/]'}\t"
+            f"Accuracy: {rule_accuracy * 100:.2f}%"
+        )
+    LOGGER.debug("Demonstration complete")
 
 
 if __name__ == "__main__":

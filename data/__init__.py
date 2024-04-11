@@ -20,4 +20,5 @@ FEATURES_TEST = os.path.join(data_dir, "features_test.npz")
 FEATURES_TRAIN = os.path.join(data_dir, "features_train.npz")
 
 # manually captured data
-DATA_CAPTURE = os.path.join(data_dir, "data_capture.csv")
+CAPTURED_DATA = os.path.join(data_dir, "capture.csv")
+DEMO_DATA = os.path.join(data_dir, "demo.csv")
