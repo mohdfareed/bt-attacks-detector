@@ -9,7 +9,9 @@ LOGGER = logging.getLogger(__name__)
 
 root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 logging_file = os.path.join(root_dir, "dev.log")
-reduced_logging_modules = []  # modules with reduced (WARNING) logging level
+reduced_logging_modules: list[str] = (
+    []
+)  # modules with reduced (WARNING) logging level
 
 
 def setup_logging(debug: bool = False, cleanup: bool = False) -> None:

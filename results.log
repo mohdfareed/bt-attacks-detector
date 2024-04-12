@@ -1,0 +1,87 @@
+[2024-04-11 20:25:01.292] DEBUG    Logging setup complete: /Users/mohdfareed/Developer/school/bt-attacks-detector/dev.log - scripts.utils [utils.py:67]
+[2024-04-11 20:25:01.292] INFO     Preprocessing dataset... - scripts.preprocessing [preprocessing.py:15]
+[2024-04-11 20:25:01.294] DEBUG    Loading datasets... - scripts.preprocessing [preprocessing.py:17]
+[2024-04-11 20:25:02.733] DEBUG    Combining datasets... - scripts.preprocessing [preprocessing.py:38]
+[2024-04-11 20:25:02.914] DEBUG    Summarizing datasets... - scripts.preprocessing [preprocessing.py:49]
+[2024-04-11 20:25:03.106] WARNING  Training data:
+                No.          Time        Length          Type
+count  2.016511e+06  2.016511e+06  2.016511e+06  2.016511e+06
+mean   4.178240e+05  2.484735e+05  6.525454e+01  4.951081e-01
+std    2.765201e+05  3.987048e+05  1.508436e+02  4.999762e-01
+min    1.000000e+00  0.000000e+00  3.000000e+00  0.000000e+00
+25%    1.680430e+05  1.615814e+03  8.000000e+00  0.000000e+00
+50%    3.953820e+05  3.715332e+03  1.900000e+01  0.000000e+00
+75%    6.474455e+05  6.852889e+05  3.200000e+01  1.000000e+00
+max    9.983910e+05  1.198804e+06  1.021000e+03  1.000000e+00 - scripts.preprocessing [preprocessing.py:50]
+[2024-04-11 20:25:03.153] WARNING  Testing data:
+                No.           Time         Length           Type
+count  5.171950e+05  517195.000000  517195.000000  517195.000000
+mean   4.139546e+05    7906.350022      64.974567       0.486679
+std    3.928840e+05   48834.161261     150.593726       0.499823
+min    1.000000e+00       0.000000       4.000000       0.000000
+25%    6.465000e+04     780.405496       8.000000       0.000000
+50%    1.932680e+05    1743.793021      29.000000       0.000000
+75%    8.714855e+05    4281.656000      32.000000       1.000000
+max    1.000784e+06  434387.445770    1005.000000       1.000000 - scripts.preprocessing [preprocessing.py:54]
+[2024-04-11 20:25:03.154] DEBUG    Writing final datasets to files... - scripts.preprocessing [preprocessing.py:60]
+[2024-04-11 20:25:08.474] DEBUG    Data preprocessing complete - scripts.preprocessing [preprocessing.py:66]
+[2024-04-11 20:25:08.556] INFO     Performing feature extraction... - scripts.feature_extraction [feature_extraction.py:20]
+[2024-04-11 20:25:08.557] DEBUG    Loading datasets... - scripts.feature_extraction [feature_extraction.py:22]
+[2024-04-11 20:25:09.952] DEBUG    Applying TF-IDF vectorization... - scripts.feature_extraction [feature_extraction.py:27]
+[2024-04-11 20:25:17.028] DEBUG    Applying one-hot encoding... - scripts.feature_extraction [feature_extraction.py:33]
+[2024-04-11 20:25:17.294] DEBUG    Applying time delta encoding... - scripts.feature_extraction [feature_extraction.py:39]
+[2024-04-11 20:25:17.348] DEBUG    Applying standard scaling... - scripts.feature_extraction [feature_extraction.py:44]
+[2024-04-11 20:25:17.381] DEBUG    Applying feature hashing... - scripts.feature_extraction [feature_extraction.py:50]
+[2024-04-11 20:25:20.694] DEBUG    Combining features... - scripts.feature_extraction [feature_extraction.py:58]
+[2024-04-11 20:25:21.033] DEBUG    Feature extraction results: - scripts.feature_extraction [feature_extraction.py:81]
+[2024-04-11 20:25:21.034] WARNING  TF-IDF Vocabulary size: 1000 - scripts.feature_extraction [feature_extraction.py:82]
+[2024-04-11 20:25:21.035] WARNING  One-Hot Encoding unique categories: 13 - scripts.feature_extraction [feature_extraction.py:83]
+[2024-04-11 20:25:21.036] WARNING  Time Delta features count: 1 - scripts.feature_extraction [feature_extraction.py:84]
+[2024-04-11 20:25:21.037] WARNING  Standard Scaling features count: 1 - scripts.feature_extraction [feature_extraction.py:85]
+[2024-04-11 20:25:21.037] WARNING  Feature Hashing features count: 20 - scripts.feature_extraction [feature_extraction.py:86]
+[2024-04-11 20:25:21.038] WARNING  Total number of features: 1055 - scripts.feature_extraction [feature_extraction.py:87]
+[2024-04-11 20:25:21.038] DEBUG    Writing data and models to files... - scripts.feature_extraction [feature_extraction.py:90]
+[2024-04-11 20:25:28.321] DEBUG    Feature extraction complete - scripts.feature_extraction [feature_extraction.py:98]
+[2024-04-11 20:32:52.363] INFO     Training model (Gradient Boosting)... - scripts.ml_model [ml_model.py:28]
+[2024-04-11 20:32:52.365] DEBUG    Loading features and labels... - scripts.ml_model [ml_model.py:30]
+[2024-04-11 20:32:52.750] DEBUG    Training model... - scripts.ml_model [ml_model.py:37]
+[2024-04-11 20:35:18.531] DEBUG    Evaluating model... - scripts.ml_model [ml_model.py:45]
+[2024-04-11 20:35:19.137] WARNING  Train accuracy: 0.9981032299229498 - scripts.ml_model [ml_model.py:48]
+[2024-04-11 20:35:19.177] WARNING  Confusion matrix:
+[[264943    544]
+ [   437 251271]] - scripts.ml_model [ml_model.py:50]
+[2024-04-11 20:35:19.561] WARNING  Classification report:
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00    265487
+           1       1.00      1.00      1.00    251708
+
+    accuracy                           1.00    517195
+   macro avg       1.00      1.00      1.00    517195
+weighted avg       1.00      1.00      1.00    517195
+ - scripts.ml_model [ml_model.py:52]
+[2024-04-11 20:35:19.563] DEBUG    Saving model... - scripts.ml_model [ml_model.py:55]
+[2024-04-11 20:35:19.574] DEBUG    Model training complete - scripts.ml_model [ml_model.py:61]
+[2024-04-11 20:35:19.594] INFO     Exiting... - __main__ [main.py:44]
+[2024-04-11 20:36:13.093] DEBUG    Logging setup complete: /Users/mohdfareed/Developer/school/bt-attacks-detector/dev.log - scripts.utils [utils.py:67]
+[2024-04-11 20:36:13.093] INFO     Training model (Random Forest)... - scripts.ml_model [ml_model.py:28]
+[2024-04-11 20:36:13.095] DEBUG    Loading features and labels... - scripts.ml_model [ml_model.py:30]
+[2024-04-11 20:36:13.439] DEBUG    Training model... - scripts.ml_model [ml_model.py:37]
+[2024-04-11 20:43:43.043] DEBUG    Evaluating model... - scripts.ml_model [ml_model.py:45]
+[2024-04-11 20:43:45.852] WARNING  Train accuracy: 0.9352255918947399 - scripts.ml_model [ml_model.py:48]
+[2024-04-11 20:43:45.896] WARNING  Confusion matrix:
+[[264736    751]
+ [ 32750 218958]] - scripts.ml_model [ml_model.py:50]
+[2024-04-11 20:43:46.271] WARNING  Classification report:
+              precision    recall  f1-score   support
+
+           0       0.89      1.00      0.94    265487
+           1       1.00      0.87      0.93    251708
+
+    accuracy                           0.94    517195
+   macro avg       0.94      0.93      0.93    517195
+weighted avg       0.94      0.94      0.93    517195
+ - scripts.ml_model [ml_model.py:52]
+[2024-04-11 20:43:46.272] DEBUG    Saving model... - scripts.ml_model [ml_model.py:55]
+[2024-04-11 20:43:46.386] DEBUG    Model training complete - scripts.ml_model [ml_model.py:61]
+[2024-04-11 20:43:46.406] INFO     Exiting... - __main__ [main.py:44]

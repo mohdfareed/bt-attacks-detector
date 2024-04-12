@@ -5,6 +5,7 @@ import pandas as pd  # type: ignore
 from rich import print
 
 import data
+import models
 import scripts.utils as utils
 from scripts.ml_model import create_predictor as create_ml_predicator
 from scripts.rule_based import create_predictor as create_rule_predicator
@@ -19,34 +20,41 @@ def run():
 
     # load prediction models
     LOGGER.debug("Loading models...")
-    predict_ml = create_ml_predicator()
+    predict_gbm = create_ml_predicator(models.GBM_MODEL)
+    predict_rand = create_ml_predicator(models.RAND_FOREST_MODEL)
     predict_rules = create_rule_predicator()
 
     # accuracy tracking
-    ml_misclassifications = 0
+    gbm_misclassifications = 0
+    rand_misclassifications = 0
     rule_misclassifications = 0
 
     # load demo data
     dataset = pd.read_csv(data.DEMO_DATA)
     for i, _ in dataset.iterrows():
-        time.sleep(0.5)  # simulate real-time data
+        time.sleep(0.05)  # simulate real-time data
         row: pd.DataFrame = dataset.iloc[[i]]  # type: ignore
 
         # make predictions
-        ml_prediction = predict_ml(row)
+        gbm_prediction = predict_gbm(row)
+        rand_prediction = predict_rand(row)
         rule_prediction = predict_rules(row)
 
         # update accuracy
-        ml_misclassifications += int(ml_prediction)  # type: ignore
-        ml_accuracy = 1 - (ml_misclassifications / (int(i) + 1))  # type: ignore
-        rule_misclassifications += int(rule_prediction)
+        gbm_misclassifications += gbm_prediction
+        gbm_accuracy = 1 - (gbm_misclassifications / (int(i) + 1))  # type: ignore
+        rand_misclassifications += rand_prediction
+        rand_accuracy = 1 - (rand_misclassifications / (int(i) + 1))  # type: ignore
+        rule_misclassifications += rule_prediction
         rule_accuracy = 1 - (rule_misclassifications / (int(i) + 1))  # type: ignore
 
         # display results
         display(
             row,
-            ml_prediction,
-            ml_accuracy,
+            gbm_prediction,
+            gbm_accuracy,
+            rand_prediction,
+            rand_accuracy,
             rule_prediction,
             rule_accuracy,
         )
@@ -56,8 +64,10 @@ def run():
 
 def display(
     row: pd.DataFrame,
-    ml_prediction: int,
-    ml_accuracy: float,
+    gbm_prediction: int,
+    gbm_accuracy: float,
+    rand_prediction: int,
+    rand_accuracy: float,
     rule_prediction: int,
     rule_accuracy: float,
 ):
@@ -65,12 +75,17 @@ def display(
     print()
     print(row.to_string(index=False))
     print(
-        f"[bold]ML Prediction:[/]\t\t"
-        f"{'[bold red]Attack[/]' if ml_prediction else '[bold green]Benign[/]'}\t"
-        f"Accuracy: {ml_accuracy * 100:.2f}%"
+        f"[bold]Gradient Boosting Machine:[/]\t"
+        f"{'[bold red]Attack[/]' if gbm_prediction else '[bold green]Benign[/]'}\t"
+        f"Accuracy: {gbm_accuracy * 100:.2f}%"
     )
     print(
-        f"[bold]Rule-Based Prediction:[/]\t"
+        f"[bold]Random Forest:[/]\t\t\t"
+        f"{'[bold red]Attack[/]' if rand_prediction else '[bold green]Benign[/]'}\t"
+        f"Accuracy: {rand_accuracy * 100:.2f}%"
+    )
+    print(
+        f"[bold]Rule-Based Prediction:[/]\t\t"
         f"{'[bold red]Attack[/]' if rule_prediction else '[bold green]Benign[/]'}\t"
         f"Accuracy: {rule_accuracy * 100:.2f}%"
     )

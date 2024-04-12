@@ -50,6 +50,12 @@ project_root/
 └── evaluation.txt
 ```
 
+The dataset above contain mostly attack data, with a relatively small amount of
+benign data. Benign data were captured on a macOS device to balance the dataset.
+The captured data is not included in the repository due to its size. The device
+had 2 headphones, a mouse, a smartwatch, and a game controller connected to it.
+The data was captured as outlined in the demonstration section.
+
 Run the following command to see the usage information:
 
 ```sh
@@ -83,65 +89,4 @@ sudo ./main.py --demo [--verbose] # Linux/macOS - pausing enabled
 
 ```ps1
 .\main.py --demo [--verbose] # Windows
-```
-
-## Statistics
-
-### Training Data Summary
-
-```txt
-                 No.          Time         Length      Type
-count  998391.000000  9.983910e+05  998391.000000  998391.0
-mean   499196.000000  4.621494e+05      20.064474       1.0
-std    288210.800641  4.679402e+05      12.352341       0.0
-min         1.000000  0.000000e+00       4.000000       1.0
-25%    249598.500000  2.276077e+03       8.000000       1.0
-50%    499196.000000  6.853190e+05      16.000000       1.0
-75%    748793.500000  8.540422e+05      32.000000       1.0
-max    998391.000000  1.198804e+06     255.000000       1.0
-```
-
-### Testing Data Summary
-
-```txt
-                 No.           Time         Length      Type
-count  251708.000000  251708.000000  251708.000000  251708.0
-mean   125854.500000    1071.256077      20.006591       1.0
-std     72661.985116     638.578923      12.006976       0.0
-min         1.000000       0.000000       5.000000       1.0
-25%     62927.750000     601.485238       8.000000       1.0
-50%    125854.500000    1050.763037      16.000000       1.0
-75%    188781.250000    1669.751179      32.000000       1.0
-max    251708.000000    2094.097550      46.000000       1.0
-```
-
-### Feature Extraction
-
-- TF-IDF Vocabulary size: 609
-- One-Hot Encoding unique categories: 6
-- Standard Scaling mean: 22.7672
-- Standard Scaling std: 14.1469
-- Feature Hashing features count: 20
-- Total number of features: 657
-
-### Model Evaluation
-
-Training accuracy: 0.8341019057652395
-
-#### Confusion Matrix
-
-|                    | **True Positive** | **False Negative** |
-| ------------------ | ----------------- | ------------------ |
-| **True Negative**  | 63467             | 1863               |
-| **False Positive** | 50733             | 200975             |
-
-#### Classification Report
-
-```txt
-              precision    recall  f1-score   support
-           0       0.56      0.97      0.71     65330
-           1       0.99      0.80      0.88    251708
-    accuracy                           0.83    317038
-   macro avg       0.77      0.88      0.80    317038
-weighted avg       0.90      0.83      0.85    317038
 ```

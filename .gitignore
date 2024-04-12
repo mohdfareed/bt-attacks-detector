@@ -13,5 +13,5 @@
 !.vscode/*.code-snippets
 
 # project
-*.log
+dev.log
 data

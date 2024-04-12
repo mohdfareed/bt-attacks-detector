@@ -18,10 +18,16 @@ from scripts.feature_extraction import create_feature_extractor
 LOGGER = logging.getLogger(__name__)
 """Model training logger."""
 
+# classifier = models.GBM_MODEL
+classifier = models.RAND_FOREST_MODEL
+model_name = (
+    "Gradient Boosting" if classifier == models.GBM_MODEL else "Random Forest"
+)
+
 
 def run():
     """Run the model training script."""
-    LOGGER.info("Training model...")
+    LOGGER.info("Training model (%s)...", model_name)
 
     LOGGER.debug("Loading features and labels...")
     training_features = load_npz(data.FEATURES_TRAIN)
@@ -31,8 +37,10 @@ def run():
 
     # train model
     LOGGER.debug("Training model...")
-    model = GradientBoostingClassifier(verbose=1)
-    # model = RandomForestClassifier(verbose=2)
+    if classifier == models.GBM_MODEL:
+        model = GradientBoostingClassifier(verbose=1)
+    else:
+        model = RandomForestClassifier(n_jobs=-1, verbose=1)
     model.fit(training_features, training_labels)
 
     # evaluate model
@@ -47,18 +55,24 @@ def run():
 
     # write model to file
     LOGGER.debug("Saving model...")
-    # dump(model, models.GBM_MODEL)
-    dump(model, models.RAND_FOREST_MODEL)
+    if classifier == models.GBM_MODEL:
+        dump(model, models.GBM_MODEL)
+    else:
+        dump(model, models.RAND_FOREST_MODEL)
 
     LOGGER.debug("Model training complete")
 
 
-def create_predictor():
+def create_predictor(classifier):
     """Create a model predictor."""
 
     LOGGER.debug("Loading prediction model...")
-    model: GradientBoostingClassifier = load(models.GBM_MODEL)
-    # model: RandomForestClassifier = load(models.RAND_FOREST_MODEL)
+    model: GradientBoostingClassifier | RandomForestClassifier
+    if classifier == models.GBM_MODEL:
+        model = load(models.GBM_MODEL)
+    else:
+        model = load(models.RAND_FOREST_MODEL)
+    model.verbose = 0  # type: ignore
     extract_features = create_feature_extractor()
 
     def predict(data: pd.DataFrame) -> int:
@@ -67,7 +81,7 @@ def create_predictor():
         # extract features and combine
         features = extract_features(data)
         # make prediction
-        return model.predict(features)  # type: ignore
+        return int(model.predict(features))
 
     return predict
 
