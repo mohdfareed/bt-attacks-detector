@@ -1,11 +1,14 @@
 import logging
 
 import numpy as np
-import pandas as pd
-import sklearn.metrics as metrics
-from joblib import dump, load
-from scipy.sparse import load_npz
-from sklearn.ensemble import GradientBoostingClassifier
+import pandas as pd  # type: ignore
+import sklearn.metrics as metrics  # type: ignore
+from joblib import dump, load  # type: ignore
+from scipy.sparse import load_npz  # type: ignore
+from sklearn.ensemble import (  # type: ignore
+    GradientBoostingClassifier,
+    RandomForestClassifier,
+)
 
 import data
 import models
@@ -28,7 +31,8 @@ def run():
 
     # train model
     LOGGER.debug("Training model...")
-    model = GradientBoostingClassifier(verbose=2)
+    model = GradientBoostingClassifier(verbose=1)
+    # model = RandomForestClassifier(verbose=2)
     model.fit(training_features, training_labels)
 
     # evaluate model
@@ -43,7 +47,8 @@ def run():
 
     # write model to file
     LOGGER.debug("Saving model...")
-    dump(model, models.GBM_MODEL)
+    # dump(model, models.GBM_MODEL)
+    dump(model, models.RAND_FOREST_MODEL)
 
     LOGGER.debug("Model training complete")
 
@@ -53,6 +58,7 @@ def create_predictor():
 
     LOGGER.debug("Loading prediction model...")
     model: GradientBoostingClassifier = load(models.GBM_MODEL)
+    # model: RandomForestClassifier = load(models.RAND_FOREST_MODEL)
     extract_features = create_feature_extractor()
 
     def predict(data: pd.DataFrame) -> int:
