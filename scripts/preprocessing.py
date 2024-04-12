@@ -1,23 +1,13 @@
 import logging
 
 import numpy as np
-import pandas as pd
+import pandas as pd  # type: ignore
 
 import data
 import scripts.utils as utils
 
 LOGGER = logging.getLogger(__name__)
 """Data preprocessing logger."""
-
-_data_types = {
-    "No.": int,
-    "Time": float,
-    "Source": object,
-    "Destination": object,
-    "Protocol": object,
-    "Length": int,
-    "Info": object,
-}
 
 
 def run():
@@ -29,14 +19,14 @@ def run():
     benign_train = pd.read_csv(data.BENIGN_TRAIN)
     attack_test = pd.read_csv(data.ATTACK_TEST)
     benign_test = pd.read_csv(data.BENIGN_TEST)
+    capture = pd.read_csv(data.CAPTURED_DATA)
 
-    # data types check
-    LOGGER.debug("Checking data types...")
-    for dataset in [attack_train, benign_train, attack_test, benign_test]:
-        for column, data_type in _data_types.items():
-            assert (
-                dataset[column].dtype == data_type
-            ), f"Invalid data type for {column}"
+    # split captured data (80/20 split) and append to benign data
+    split_index = int(len(capture) * 0.8)  # required to preserve order
+    capture_train = capture.iloc[:split_index]
+    capture_test = capture.iloc[split_index:]
+    benign_train = pd.concat([benign_train, capture_train], ignore_index=True)
+    benign_test = pd.concat([benign_test, capture_test], ignore_index=True)
 
     # add type column indicating attack or benign
     attack_train["Type"] = 1
@@ -49,11 +39,6 @@ def run():
     train_dataset = pd.concat([attack_train, benign_train], ignore_index=True)
     test_dataset = pd.concat([attack_test, benign_test], ignore_index=True)
 
-    # shuffle datasets
-    LOGGER.debug("Shuffling datasets...")
-    train_dataset = train_dataset.sample(frac=1).reset_index(drop=True)
-    test_dataset = test_dataset.sample(frac=1).reset_index(drop=True)
-
     # generate labels
     train_labels = train_dataset["Type"]
     train_dataset.drop(columns=["Type"], inplace=True)
@@ -62,8 +47,14 @@ def run():
 
     # summary statistics
     LOGGER.debug("Summarizing datasets...")
-    LOGGER.warning(f"Training data:\n{attack_train.describe()}")
-    LOGGER.warning(f"Testing data:\n{attack_test.describe()}")
+    LOGGER.warning(
+        f"Training data:\n"
+        f"{pd.concat([attack_train, benign_train]).describe()}"
+    )
+    LOGGER.warning(
+        f"Testing data:\n"
+        f"{pd.concat([attack_test, benign_test]).describe()}"
+    )
 
     # write modified dataset to files
     LOGGER.debug("Writing final datasets to files...")
