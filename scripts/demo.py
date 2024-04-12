@@ -43,19 +43,37 @@ def run():
         rule_accuracy = 1 - (rule_misclassifications / (int(i) + 1))  # type: ignore
 
         # display results
-        print()
-        print(row.to_string(index=False))
-        print(
-            f"[bold]ML Prediction:[/]\t\t"
-            f"{'[bold red]Attack[/]' if ml_prediction else '[bold green]Benign[/]'}\t"
-            f"Accuracy: {ml_accuracy * 100:.2f}%"
+        display(
+            row,
+            ml_prediction,
+            ml_accuracy,
+            rule_prediction,
+            rule_accuracy,
         )
-        print(
-            f"[bold]Rule-Based Prediction:[/]\t"
-            f"{'[bold red]Attack[/]' if rule_prediction else '[bold green]Benign[/]'}\t"
-            f"Accuracy: {rule_accuracy * 100:.2f}%"
-        )
+
     LOGGER.debug("Demonstration complete")
+
+
+def display(
+    row: pd.DataFrame,
+    ml_prediction: int,
+    ml_accuracy: float,
+    rule_prediction: int,
+    rule_accuracy: float,
+):
+    """Display the results of the given row."""
+    print()
+    print(row.to_string(index=False))
+    print(
+        f"[bold]ML Prediction:[/]\t\t"
+        f"{'[bold red]Attack[/]' if ml_prediction else '[bold green]Benign[/]'}\t"
+        f"Accuracy: {ml_accuracy * 100:.2f}%"
+    )
+    print(
+        f"[bold]Rule-Based Prediction:[/]\t"
+        f"{'[bold red]Attack[/]' if rule_prediction else '[bold green]Benign[/]'}\t"
+        f"Accuracy: {rule_accuracy * 100:.2f}%"
+    )
 
 
 if __name__ == "__main__":
