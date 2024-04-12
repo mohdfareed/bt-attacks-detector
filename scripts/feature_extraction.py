@@ -1,11 +1,11 @@
 import logging
 
-import pandas as pd
-from joblib import dump, load
-from scipy.sparse import csr_matrix, hstack, save_npz
-from sklearn.feature_extraction import FeatureHasher
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+import pandas as pd  # type: ignore
+from joblib import dump, load  # type: ignore
+from scipy.sparse import csr_matrix, hstack, save_npz  # type: ignore
+from sklearn.feature_extraction import FeatureHasher  # type: ignore
+from sklearn.feature_extraction.text import TfidfVectorizer  # type: ignore
+from sklearn.preprocessing import OneHotEncoder, StandardScaler  # type: ignore
 
 import data
 import models
@@ -25,7 +25,7 @@ def run():
 
     # apply tf-idf vectorization to Info column
     LOGGER.debug("Applying TF-IDF vectorization...")
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(max_features=1000)
     train_info = vectorizer.fit_transform(train_dataset["Info"])
     test_info = vectorizer.transform(test_dataset["Info"])
 
@@ -35,6 +35,11 @@ def run():
     train_protocol = encoder.fit_transform(train_dataset[["Protocol"]])
     test_protocol = encoder.transform(test_dataset[["Protocol"]])
 
+    # apply time delta encoding to Time column
+    LOGGER.debug("Applying time delta encoding...")
+    train_time = csr_matrix(train_dataset[["Time"]].diff().fillna(0))
+    test_time = csr_matrix(test_dataset[["Time"]].diff().fillna(0))
+
     # apply standard scaling to Length column
     LOGGER.debug("Applying standard scaling...")
     scaler = StandardScaler()
@@ -43,30 +48,31 @@ def run():
 
     # apply feature hashing to Source and Destination columns
     LOGGER.debug("Applying feature hashing...")
-    train_source = apply_feature_hashing(train_dataset, "Source")
-    test_source = apply_feature_hashing(test_dataset, "Source")
-    train_destination = apply_feature_hashing(train_dataset, "Destination")
-    test_destination = apply_feature_hashing(test_dataset, "Destination")
+    hasher = FeatureHasher(n_features=20, input_type="string")
+    train_source = hasher.transform(train_dataset["Source"].apply(lambda x: [x]))  # type: ignore
+    test_source = hasher.transform(test_dataset["Source"].apply(lambda x: [x]))  # type: ignore
+    train_dest = hasher.transform(train_dataset["Destination"].apply(lambda x: [x]))  # type: ignore
+    test_dest = hasher.transform(test_dataset["Destination"].apply(lambda x: [x]))  # type: ignore
 
     # combine features
     LOGGER.debug("Combining features...")
     train_features = hstack(
         [
-            csr_matrix(train_dataset[["Time"]]),
+            train_time,
             train_source,
-            train_destination,
+            train_dest,
             train_protocol,
-            csr_matrix(train_length),
+            train_length,
             train_info,
         ]
     )
     test_features = hstack(
         [
-            csr_matrix(test_dataset[["Time"]]),
+            test_time,
             test_source,
-            test_destination,
+            test_dest,
             test_protocol,
-            csr_matrix(test_length),
+            test_length,
             test_info,
         ]
     )
@@ -75,8 +81,8 @@ def run():
     LOGGER.debug("Feature extraction results:")
     LOGGER.warning(f"TF-IDF Vocabulary size: {len(vectorizer.vocabulary_)}")
     LOGGER.warning(f"One-Hot Encoding unique categories: {len(encoder.categories_[0])}")  # type: ignore
-    LOGGER.warning(f"Standard Scaling mean: {scaler.mean_[0]:.4f}")  # type: ignore
-    LOGGER.warning(f"Standard Scaling std: {scaler.scale_[0]:.4f}")  # type: ignore
+    LOGGER.warning(f"Time Delta features count: {train_time.shape[1]}")
+    LOGGER.warning(f"Standard Scaling features count: {train_length.shape[1]}")
     LOGGER.warning(f"Feature Hashing features count: {train_source.shape[1]}")
     LOGGER.warning(f"Total number of features: {train_features.shape[1]}")
 
@@ -87,17 +93,9 @@ def run():
     dump(vectorizer, models.VECTORIZER_MODEL)
     dump(encoder, models.ENCODER_MODEL)
     dump(scaler, models.SCALER_MODEL)
+    dump(hasher, models.HASHER_MODEL)
 
     LOGGER.debug("Feature extraction complete")
-
-
-def apply_feature_hashing(dataset, column, n_features=20):
-    """Applies feature hashing to a specified column of the dataset."""
-    hasher = FeatureHasher(n_features=n_features, input_type="string")
-    hashed_features = hasher.transform(
-        dataset[column].apply(lambda x: [str(x)])
-    )
-    return hashed_features
 
 
 def create_feature_extractor():
@@ -106,27 +104,36 @@ def create_feature_extractor():
     LOGGER.debug("Loading feature extraction models...")
     vectorizer: TfidfVectorizer = load(models.VECTORIZER_MODEL)
     encoder: OneHotEncoder = load(models.ENCODER_MODEL)
-    scaler: StandardScaler = load(models.SCALER_MODEL)
+    hasher: FeatureHasher = load(models.HASHER_MODEL)
+    scalar: StandardScaler = load(models.SCALER_MODEL)
+    prev_time = 0
 
     def extract_features(data: pd.DataFrame) -> csr_matrix:
         """Generate the features for the given dataset row."""
-        nonlocal vectorizer, encoder
+        nonlocal vectorizer, encoder, hasher, scalar, prev_time
+
         # extract features and combine
         info = vectorizer.transform(data["Info"])
         protocol = encoder.transform(data[["Protocol"]])
-        length = scaler.transform(data[["Length"]])
-        source = apply_feature_hashing(data, "Source")
-        destination = apply_feature_hashing(data, "Destination")
+        time = csr_matrix(data[["Time"]].diff().fillna(prev_time))
+        length = scalar.transform(data[["Length"]])
+        source = hasher.transform(data["Source"].apply(lambda x: [x]))  # type: ignore
+        dest = hasher.transform(data["Destination"].apply(lambda x: [x]))  # type: ignore
+
+        # combine features
         features = hstack(
             [
-                csr_matrix(data[["Time"]]),
+                time,
                 source,
-                destination,
+                dest,
                 protocol,
-                csr_matrix(length),
+                length,
                 info,
             ]
         )
+
+        # update previous time and return features
+        prev_time = data["Time"].values[0]
         return features  # type: ignore
 
     return extract_features
