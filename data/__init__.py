@@ -4,8 +4,8 @@ import os
 
 data_dir = os.path.dirname(os.path.realpath(__file__))
 
-ATTACK_TEST = os.path.join(data_dir, "attack_test.csv")
-ATTACK_TRAIN = os.path.join(data_dir, "attack_train.csv")
+ATTACK_TEST = os.path.join(data_dir, "dos_test.csv")
+ATTACK_TRAIN = os.path.join(data_dir, "dos_train.csv")
 BENIGN_TEST = os.path.join(data_dir, "benign_test.csv")
 BENIGN_TRAIN = os.path.join(data_dir, "benign_train.csv")
 

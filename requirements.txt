@@ -1,9 +1,19 @@
 # utilities
+jupyter
 rich
 keyboard
+
 # data processing
 pandas
 numpy
 scapy
+
+# data visualization
+matplotlib
+seaborn
+SciencePlots
+wordcloud
+
 # machine learning
 scikit-learn
+scikit-optimize

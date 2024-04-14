@@ -7,7 +7,7 @@ Machine learning model designed to detect Bluetooth DDoS/DoS attacks.
 - Python 3.12
 - Git
 
-## Development Environment Setup
+## Environment Setup
 
 For Linux or macOS, run the following:
 
@@ -54,7 +54,9 @@ The dataset above contain mostly attack data, with a relatively small amount of
 benign data. Benign data were captured on a macOS device to balance the dataset.
 The captured data is not included in the repository due to its size. The device
 had 2 headphones, a mouse, a smartwatch, and a game controller connected to it.
-The data was captured as outlined in the demonstration section.
+The data was captured as outlined in the demonstration section. The captured
+data can be downloaded from
+[here](https://www.icloud.com/iclouddrive/031kzui9eqKLht9L8aIDuukIQ#capture).
 
 Run the following command to see the usage information:
 
@@ -67,6 +69,9 @@ source .venv/bin/activate # Linux/macOS
 .\.venv\Scripts\Activate.ps1 # Windows
 .\main.py --help
 ```
+
+Open the Jupyter notebooks and select the environment `.venv` as the kernel to
+run various experiments and analyses.
 
 ### Demonstration
 
