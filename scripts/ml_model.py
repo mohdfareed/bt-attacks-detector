@@ -18,8 +18,8 @@ from scripts.feature_extraction import create_feature_extractor
 LOGGER = logging.getLogger(__name__)
 """Model training logger."""
 
-# classifier = models.GBM_MODEL
-classifier = models.RAND_FOREST_MODEL
+classifier = models.GBM_MODEL
+# classifier = models.RAND_FOREST_MODEL
 model_name = (
     "Gradient Boosting" if classifier == models.GBM_MODEL else "Random Forest"
 )
@@ -45,6 +45,7 @@ def run():
 
     # evaluate model
     LOGGER.debug("Evaluating model...")
+    model.verbose = 0  # type: ignore
     predictions = model.predict(testing_features)
     accuracy = metrics.accuracy_score(testing_labels, predictions)
     LOGGER.warning(f"Train accuracy: {accuracy}")

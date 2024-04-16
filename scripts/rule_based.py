@@ -67,9 +67,9 @@ def run():
     LOGGER.debug("Loading dataset...")
     # dataset = pd.read_csv(data.PREPROCESSED_TRAIN)
     # labels = np.load(data.LABELS_TRAIN)
-    # dataset = pd.read_csv(data.PREPROCESSED_TEST)
-    # labels = np.load(data.LABELS_TEST)
-    dataset = pd.read_csv(data.DEMO_DATA)
+    dataset = pd.read_csv(data.PREPROCESSED_TEST)
+    labels = np.load(data.LABELS_TEST)
+    # dataset = pd.read_csv(data.DEMO_DATA)
     labels = np.zeros(len(dataset))
 
     LOGGER.debug("Evaluating...")
