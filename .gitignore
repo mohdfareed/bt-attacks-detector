@@ -1,8 +1,7 @@
 # python
 *__pycache__*
-*.pytest_cache*
+*.mypy_cache*
 .venv/
-!*.py
 
 # vscode
 .vscode/*
@@ -13,5 +12,7 @@
 !.vscode/*.code-snippets
 
 # project
-dev.log
-data
+*.log
+data/
+models/
+!__init__.py

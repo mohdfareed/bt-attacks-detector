@@ -1,6 +1,6 @@
 # Bluetooth Attacks Detector
 
-Machine learning model designed to detect Bluetooth DDoS/DoS attacks.
+Machine learning model designed to detect Bluetooth DoS attacks.
 
 ## Prerequisites
 
@@ -28,8 +28,6 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 
 ## Usage
 
-<!-- TODO: update dataset download instructions -->
-
 Download the [dataset](https://www.unb.ca/cic/datasets/iomt-dataset-2024.html)
 and place the Bluetooth attack/benign dataset in the `data` directory.
 Processed data and models will be saved in the `data` and `models` directories.
@@ -37,26 +35,32 @@ Logs will be saved to the root of the project. Dataset statistics and model
 evaluation results will be saved in the root of the project as well. The
 following is the expected directory structure of un-managed files:
 
+The dataset above contain mostly attack data, with a relatively small amount of
+benign data. Benign data was captured on macOS to balance the dataset using
+[PacketLogger](https://www.bluetooth.com/blog/a-new-way-to-debug-iosbluetooth-applications/),
+then it was exported to `.btsnoop` format and converted to `.csv` format using
+Wireshark. The captured data is not included in the repository due to its size.
+The device had 2 headphones, a mouse, a smartwatch, and a game controller
+connected to it. This process was repeated twice, once for balancing the
+dataset and once to create the data for the demonstration. The captured data
+can be downloaded from
+[here](https://www.icloud.com/iclouddrive/031kzui9eqKLht9L8aIDuukIQ#capture),
+the the demo data an be downloaded from
+[here](https://www.icloud.com/iclouddrive/06ecTy11sGg9X8F0eIFS3i3ug#demo).
+The final project structure should be as follows:
+
 ```txt
 project_root/
 ├── data/
-│   ├── attack_test.csv
-│   ├── attack_train.csv
 │   ├── benign_test.csv
-│   └── benign_train.csv
+│   ├── benign_train.csv
+│   ├── capture.csv
+│   ├── demo.csv
+│   ├── dos_test.csv
+│   └── dos_train.csv
 ├── models/
-├── dataset_stats.txt
 ├── dev.log
-└── evaluation.txt
 ```
-
-The dataset above contain mostly attack data, with a relatively small amount of
-benign data. Benign data were captured on a macOS device to balance the dataset.
-The captured data is not included in the repository due to its size. The device
-had 2 headphones, a mouse, a smartwatch, and a game controller connected to it.
-The data was captured as outlined in the demonstration section. The captured
-data can be downloaded from
-[here](https://www.icloud.com/iclouddrive/031kzui9eqKLht9L8aIDuukIQ#capture).
 
 Run the following command to see the usage information:
 
@@ -71,27 +75,4 @@ source .venv/bin/activate # Linux/macOS
 ```
 
 Open the Jupyter notebooks and select the environment `.venv` as the kernel to
-run various experiments and analyses.
-
-### Demonstration
-
-The script uses manually captured Bluetooth packets to demonstrate the model's
-detection capabilities. The captured data must be at `data/data_capture.csv`.
-Data was captured on macOS using
-[PacketLogger](https://www.bluetooth.com/blog/a-new-way-to-debug-iosbluetooth-applications/),
-then it was exported to `.btsnoop` format and converted to `.csv` format using
-Wireshark.
-
-Admin privileges are required to monitor user input for pausing/unpausing
-execution. On windows, the script must be run with PowerShell as an
-administrator to support this feature. The script can be run in demo mode using
-the following commands:
-
-```sh
-./main.py --demo [--verbose]      # Linux/macOS - pausing disabled
-sudo ./main.py --demo [--verbose] # Linux/macOS - pausing enabled
-```
-
-```ps1
-.\main.py --demo [--verbose] # Windows
-```
+run various experiments that were performed.
