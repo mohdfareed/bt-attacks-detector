@@ -18,58 +18,99 @@ def run():
     """Run the evaluation script."""
     LOGGER.info("Running demonstration...")
 
-    # load prediction models
-    LOGGER.debug("Loading models...")
+    # load prediction models and dataset
+    LOGGER.debug("Loading models and dataset...")
     predict_gbm = create_ml_predicator(models.GBM_MODEL)
     predict_rand = create_ml_predicator(models.RAND_FOREST_MODEL)
     predict_rules = create_rule_predicator()
+    dataset = pd.read_csv(data.DEMO_DATA)
 
+    try:
+        LOGGER.debug("Running demonstration...")
+        run_demo(dataset, predict_gbm, predict_rand, predict_rules)
+    except KeyboardInterrupt:
+        print()
+        # evaluate on entire dataset
+        LOGGER.info("Evaluating...")
+        evaluate(dataset, predict_gbm, predict_rand, predict_rules)
+        exit(0)
+
+    LOGGER.debug("Demonstration complete")
+
+
+def run_demo(dataset, gbm, rand, rule):
+    for i, _ in dataset.iterrows():
+        time.sleep(0.5)  # simulate real-time data
+        row: pd.DataFrame = dataset.iloc[[i]]  # type: ignore
+
+        # make predictions
+        gbm_prediction = gbm(row)
+        rand_prediction = rand(row)
+        rule_prediction = rule(row)
+
+        # create prediction string
+        gbm_str = (
+            "[bold red]Attack[/]"
+            if gbm_prediction
+            else "[bold green]Benign[/]"
+        )
+        rand_str = (
+            "[bold red]Attack[/]"
+            if rand_prediction
+            else "[bold green]Benign[/]"
+        )
+        rule_str = (
+            "[bold red]Attack[/]"
+            if rule_prediction
+            else "[bold green]Benign[/]"
+        )
+
+        # display results
+        print()
+        print(row.to_string(index=False))
+        print(f"[bold]Gradient Boosting Machine:[/]\t{gbm_str}")
+        print(f"[bold]Random Forest:[/]\t\t\t{rand_str}")
+        print(f"[bold]Rule-Based Prediction:[/]\t\t{rule_str}")
+
+
+def evaluate(dataset, gbm, rand, rule):
     # accuracy tracking
     gbm_misclassifications = 0
     rand_misclassifications = 0
     rule_misclassifications = 0
 
-    # load demo data
-    dataset = pd.read_csv(data.DEMO_DATA)
     for i, _ in dataset.iterrows():
-        time.sleep(0.05)  # simulate real-time data
         row: pd.DataFrame = dataset.iloc[[i]]  # type: ignore
-
         # make predictions
-        gbm_prediction = predict_gbm(row)
-        rand_prediction = predict_rand(row)
-        rule_prediction = predict_rules(row)
-
+        gbm_prediction = gbm(row)
+        rand_prediction = rand(row)
+        rule_prediction = rule(row)
         # update accuracy
         gbm_misclassifications += gbm_prediction
-        gbm_accuracy = 1 - (gbm_misclassifications / (int(i) + 1))  # type: ignore
         rand_misclassifications += rand_prediction
-        rand_accuracy = 1 - (rand_misclassifications / (int(i) + 1))  # type: ignore
         rule_misclassifications += rule_prediction
-        rule_accuracy = 1 - (rule_misclassifications / (int(i) + 1))  # type: ignore
 
-        # display results
-        display(
-            row,
-            gbm_prediction,
-            gbm_accuracy,
-            rand_prediction,
-            rand_accuracy,
-            rule_prediction,
-            rule_accuracy,
-        )
+    # calculate final accuracy
+    gbm_accuracy = 1 - (gbm_misclassifications / len(dataset))
+    rand_accuracy = 1 - (rand_misclassifications / len(dataset))
+    rule_accuracy = 1 - (rule_misclassifications / len(dataset))
 
-    LOGGER.debug("Demonstration complete")
+    # display results
+    LOGGER.warning("Complete demo evaluation results:")
+    LOGGER.warning(
+        f"Gradient Boosting Machine: {gbm_accuracy * 100:.2f}% accuracy"
+    )
+    LOGGER.warning(f"Random Forest: {rand_accuracy * 100:.2f}% accuracy")
+    LOGGER.warning(
+        f"Rule-Based Prediction: {rule_accuracy * 100:.2f}% accuracy"
+    )
 
 
 def display(
     row: pd.DataFrame,
     gbm_prediction: int,
-    gbm_accuracy: float,
     rand_prediction: int,
-    rand_accuracy: float,
     rule_prediction: int,
-    rule_accuracy: float,
 ):
     """Display the results of the given row."""
     print()
@@ -77,17 +118,14 @@ def display(
     print(
         f"[bold]Gradient Boosting Machine:[/]\t"
         f"{'[bold red]Attack[/]' if gbm_prediction else '[bold green]Benign[/]'}\t"
-        f"Accuracy: {gbm_accuracy * 100:.2f}%"
     )
     print(
         f"[bold]Random Forest:[/]\t\t\t"
         f"{'[bold red]Attack[/]' if rand_prediction else '[bold green]Benign[/]'}\t"
-        f"Accuracy: {rand_accuracy * 100:.2f}%"
     )
     print(
         f"[bold]Rule-Based Prediction:[/]\t\t"
         f"{'[bold red]Attack[/]' if rule_prediction else '[bold green]Benign[/]'}\t"
-        f"Accuracy: {rule_accuracy * 100:.2f}%"
     )
 
 

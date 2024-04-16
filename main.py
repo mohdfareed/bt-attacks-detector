@@ -6,6 +6,7 @@ import scripts.demo
 import scripts.feature_extraction
 import scripts.ml_model
 import scripts.preprocessing
+import scripts.rule_based
 import scripts.utils as utils
 
 LOGGER = logging.getLogger(__name__)
@@ -17,6 +18,7 @@ def main(
     preprocess: bool,
     features: bool,
     train: bool,
+    rule: bool,
     demo: bool,
     cleanup: bool,
 ):
@@ -32,6 +34,7 @@ def main(
         scripts.preprocessing.run() if preprocess else None
         scripts.feature_extraction.run() if features else None
         scripts.ml_model.run() if train else None
+        scripts.rule_based.run() if rule else None
         scripts.demo.run() if demo else None
     except KeyboardInterrupt:
         print()
@@ -61,6 +64,9 @@ if __name__ == "__main__":
         "-t", "--train", action="store_true", help="train models"
     )
     parser.add_argument(
+        "-r", "--rule", action="store_true", help="run rule-based model"
+    )
+    parser.add_argument(
         "-d", "--demo", action="store_true", help="run demo (requires admin)"
     )
     parser.add_argument(
@@ -73,6 +79,7 @@ if __name__ == "__main__":
         args.preprocess,
         args.features,
         args.train,
+        args.rule,
         args.demo,
         args.cleanup,
     )
