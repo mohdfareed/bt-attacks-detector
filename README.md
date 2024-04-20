@@ -44,8 +44,7 @@ Download the [dataset](https://www.unb.ca/cic/datasets/iomt-dataset-2024.html)
 and place the Bluetooth attack/benign dataset in the `data` directory.
 Processed data and models will be saved in the `data` and `models` directories.
 Logs will be saved to the root of the project. Dataset statistics and model
-evaluation results will be saved in the root of the project as well. The
-following is the expected directory structure of un-managed files:
+evaluation results will be saved in the root of the project as well.
 
 The dataset above contain mostly attack data, with a relatively small amount of
 benign data. Benign data was captured on macOS to balance the dataset using
