@@ -1,19 +1,31 @@
-# Bluetooth Attacks Detector
+# Bluetooth DoS Detector
 
-Machine learning model designed to detect Bluetooth DoS attacks.
+Three implementations of Bluetooth DoS attacks detection. The first is a
+Gradient Boosting Machine classifier, the second is a Random Forest classifier,
+the third is a rule-based algorithm.
+
+The project contains the main implementations of each using the best results in
+the `scripts` folder. Different experiments were performed to determine the
+best implementations using Jupyter notebooks in the `notebooks` folder. The
+`data` folder contains the dataset used for training and testing the models.
+The `models` folder contains the trained models.
+
+A demonstration of the all three methods is also provided in the `scripts`
+folder. All outputs from all scripts are saved to `dev.log` in the root of the
+project.
 
 ## Prerequisites
 
 - Python 3.12
-- Git
 
 ## Environment Setup
 
 For Linux or macOS, run the following:
 
 ```sh
-git clone https://github.com/mohdfareed/bt-attacks-detector.git
-cd bt-attacks-detector
+# clone repo or download and extract the zip
+git clone https://github.com/mohdfareed/bt-dos-detector.git
+cd bt-dos-detector
 ./setup.sh
 ```
 
@@ -26,7 +38,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 .\setup.ps1
 ```
 
-## Usage
+## Dataset
 
 Download the [dataset](https://www.unb.ca/cic/datasets/iomt-dataset-2024.html)
 and place the Bluetooth attack/benign dataset in the `data` directory.
@@ -44,25 +56,29 @@ The device had 2 headphones, a mouse, a smartwatch, and a game controller
 connected to it. This process was repeated twice, once for balancing the
 dataset and once to create the data for the demonstration. The captured data
 can be downloaded from
-[here](https://www.icloud.com/iclouddrive/031kzui9eqKLht9L8aIDuukIQ#capture),
+[here](https://drive.google.com/file/d/1nPkZbiXhNc8zpFOwwX6NAAe4SncvrVb6/view?usp=sharing),
 the the demo data an be downloaded from
-[here](https://www.icloud.com/iclouddrive/06ecTy11sGg9X8F0eIFS3i3ug#demo).
+[here](https://drive.google.com/file/d/1P6eQIv0IdKEqZU5xDMTySrgvhGHSyFKf/view?usp=sharing).
+
+## Usage
+
 The final project structure should be as follows:
 
 ```txt
 project_root/
-├── data/
-│   ├── benign_test.csv
-│   ├── benign_train.csv
-│   ├── capture.csv
-│   ├── demo.csv
-│   ├── dos_test.csv
-│   └── dos_train.csv
-├── models/
-├── dev.log
+└── data/
+    ├── benign_test.csv
+    ├── benign_train.csv
+    ├── capture.csv
+    ├── demo.csv
+    ├── dos_test.csv
+    └── dos_train.csv
 ```
 
-Run the following command to see the usage information:
+Open the Jupyter notebooks and select the environment `.venv` as the kernel to
+run various experiments that were performed.
+
+Run the following command to see the usage information of the main script:
 
 ```sh
 source .venv/bin/activate # Linux/macOS
@@ -73,6 +89,3 @@ source .venv/bin/activate # Linux/macOS
 .\.venv\Scripts\Activate.ps1 # Windows
 .\main.py --help
 ```
-
-Open the Jupyter notebooks and select the environment `.venv` as the kernel to
-run various experiments that were performed.

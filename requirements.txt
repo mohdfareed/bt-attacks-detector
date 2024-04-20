@@ -1,19 +1,15 @@
 # utilities
 jupyter
 rich
-keyboard
 
-# data processing
+# machine learning
 pandas
 numpy
-scapy
+scikit-learn
+scikit-optimize
 
 # data visualization
 matplotlib
 seaborn
 SciencePlots
 wordcloud
-
-# machine learning
-scikit-learn
-scikit-optimize
