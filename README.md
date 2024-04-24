@@ -2,7 +2,7 @@
 
 Three implementations of Bluetooth DoS attacks detection. The first is a
 Gradient Boosting Machine classifier, the second is a Random Forest classifier,
-the third is a rule-based algorithm.
+and the third is a rule-based algorithm.
 
 The project contains the main implementations of each using the best results in
 the `scripts` folder. Different experiments were performed to determine the
@@ -88,3 +88,76 @@ source .venv/bin/activate # Linux/macOS
 .\.venv\Scripts\Activate.ps1 # Windows
 .\main.py --help
 ```
+
+## Results
+
+A demo video of the three implementations can be found
+[here](https://drive.google.com/file/d/1zs5IKE3IwVf8u5dCiPvVBp_lHr98dAlY/view?usp=share_link).
+
+### Feature Extraction
+
+Feature extraction resulted in the following patterns:
+
+![Packet Length Density](results/length.png)
+
+![Time Differences Density](results/dt.png)
+
+Those two features, through experimentation, were found to be the most
+discriminative features for the dataset.
+
+### Gradient Boosting Machine
+
+```txt
+Test accuracy: 0.9979678844536394
+
+Confusion matrix:
+[[265024    463]
+ [   588 251120]]
+
+Classification report:
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00    265487
+           1       1.00      1.00      1.00    251708
+
+    accuracy                           1.00    517195
+   macro avg       1.00      1.00      1.00    517195
+weighted avg       1.00      1.00      1.00    517195
+```
+
+![Feature Importance](results/features_gbm.png)
+
+![Precision-Recall Curve](results/pr_gbm.png)
+
+![ROC Curve](results/roc_gbm.png)
+
+### Random Forest
+
+```txt
+Test accuracy: 0.9971287425439148
+
+Confusion matrix:
+[[264648    839]
+ [   646 251062]]
+
+Classification report:
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00    265487
+           1       1.00      1.00      1.00    251708
+
+    accuracy                           1.00    517195
+   macro avg       1.00      1.00      1.00    517195
+weighted avg       1.00      1.00      1.00    517195
+```
+
+![Feature Importance](results/features_rf.png)
+
+![Precision-Recall Curve](results/pr_rf.png)
+
+![ROC Curve](results/roc_rf.png)
+
+### Rule-Based
+
+- Training data accuracy: 93.2%
+- Testing data accuracy: 90%
